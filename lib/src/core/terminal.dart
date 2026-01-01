@@ -23,19 +23,25 @@ class Terminal {
   }
 
   int get width {
-    try {
-      return stdout.terminalColumns;
-    } catch (_) {
-      return 80; // Fallback
+    if (stdout.hasTerminal) {
+      try {
+        return stdout.terminalColumns;
+      } catch (_) {
+        return 80; // Fallback if getting size fails despite hasTerminal
+      }
     }
+    return 80; // Default width when no terminal
   }
 
   int get height {
-    try {
-      return stdout.terminalLines;
-    } catch (_) {
-      return 24; // Fallback
+    if (stdout.hasTerminal) {
+      try {
+        return stdout.terminalLines;
+      } catch (_) {
+        return 24; // Fallback if getting size fails despite hasTerminal
+      }
     }
+    return 24; // Default height when no terminal
   }
 
   /// Writes string to stdout.

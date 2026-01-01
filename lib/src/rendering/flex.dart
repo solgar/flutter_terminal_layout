@@ -77,13 +77,22 @@ class RenderFlex extends RenderObject {
         : constraints.maxHeight);
     final remainingSpace = math.max(0, maxMain - allocatedMain);
 
-    final spacePerFlex = totalFlex > 0 ? (remainingSpace / totalFlex) : 0.0;
-
     // 3. Layout flex children
+    int allocatedFlexParams = 0;
+    int currentFlexSpace = 0;
+
     for (final child in children) {
       final pd = child.parentData as FlexParentData;
       if (pd.flex != null && pd.flex! > 0) {
-        final flexSize = (spacePerFlex * pd.flex!).floor();
+        allocatedFlexParams += pd.flex!;
+
+        // Calculate target space for *all* flex items up to this one,
+        // then subtract what we've already allocated.
+        final int targetTotalSpace = (totalFlex > 0)
+            ? (remainingSpace * allocatedFlexParams / totalFlex).round()
+            : 0;
+        final int flexSize = targetTotalSpace - currentFlexSpace;
+        currentFlexSpace = targetTotalSpace;
 
         BoxConstraints innerConstraints;
         if (direction == FlexDirection.horizontal) {
@@ -96,7 +105,7 @@ class RenderFlex extends RenderObject {
           innerConstraints = BoxConstraints(
             maxWidth: constraints.maxWidth,
             minHeight: flexSize,
-            maxHeight: flexSize,
+            maxHeight: flexSize, // Force exact height
           );
         }
 
