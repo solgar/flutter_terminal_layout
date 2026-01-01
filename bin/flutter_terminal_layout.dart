@@ -24,40 +24,44 @@ class DemoApp extends StatelessWidget {
           ),
         ),
         Container(height: 1), // Margin
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                color: Ansi.bgRed,
-                height: 10,
-                child: Column(
-                  children: [
-                    Text(' Left Panel ', styleFg: Ansi.white),
-                    Spacer(),
-                    Text(' Bottom Left ', styleFg: Ansi.white),
-                  ],
+        Expanded(
+          child: Row(
+            children: [
+              Expanded(
+                child: Container(
+                  color: Ansi.bgRed,
+                  // Height removed to allow filling parent Expanded
+                  child: Column(
+                    children: [
+                      Text(' Left Panel ', styleFg: Ansi.white),
+                      Spacer(),
+                      Text(' Bottom Left ', styleFg: Ansi.white),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Container(width: 2), // Gap
-            Expanded(
-              flex: 2,
-              child: Container(
-                color: Ansi.bgGreen,
-                height: 10,
-                child: Column(
-                  children: [
-                    Text(' Right Panel (Flex 2) ', styleFg: Ansi.black),
-                    Container(height: 1, color: Ansi.bgBlack),
-                    Text(' Content Line 1 ', styleFg: Ansi.black),
-                    Text(' Content Line 2 ', styleFg: Ansi.black),
-                  ],
+              Container(width: 1), // Gap
+              Expanded(
+                flex: 2,
+                child: Container(
+                  color: Ansi.bgGreen,
+                  // Height removed to allow filling parent Expanded
+                  child: Column(
+                    children: [
+                      Text(' Right Panel (Flex 2) ', styleFg: Ansi.black),
+                      // Container(height: 1, color: Ansi.bgBlack),
+                      Spacer(),
+                      Text(' Content Line 1 ', styleFg: Ansi.black),
+                      Text(' Content Line 2 ', styleFg: Ansi.black),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-        Spacer(),
+
+        // Spacer expanded Row takes all space
         Container(
           color: Ansi.bgYellow,
           height: 1,
