@@ -7,10 +7,22 @@ class RenderContainer extends RenderObject {
   String? color;
   int? width;
   int? height;
-  RenderObject? child;
+  RenderObject? _child;
 
-  RenderContainer({this.color, this.width, this.height, this.child}) {
-    child?.parent = this;
+  RenderObject? get child => _child;
+  set child(RenderObject? value) {
+    if (_child != null) _child!.parent = null;
+    _child = value;
+    if (_child != null) {
+      _child!.parent = this;
+      _child!.attach(this);
+    }
+  }
+
+  RenderContainer({this.color, this.width, this.height, RenderObject? child}) {
+    if (child != null) {
+      this.child = child;
+    }
   }
 
   @override
@@ -69,5 +81,33 @@ class RenderContainer extends RenderObject {
     if (child != null) {
       child!.paint(canvas, offset);
     }
+  }
+
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    // 1. Check bounds
+    if (position.dx < 0 ||
+        position.dx >= size.width ||
+        position.dy < 0 ||
+        position.dy >= size.height) {
+      return false;
+    }
+
+    // 2. Test children (children first)
+    // Container has single child, coordinates are typically (0,0) relative to self unless padded?
+    // Container paint calls child at offset (which is self offset).
+    // wait, layout determines child position inside container.
+    // In this simplified model, paint(canvas, offset) passes 'offset' to child.
+    // This implies child is at (0,0) relative to container.
+    if (child != null) {
+      if (child!.hitTest(result, position: position)) {
+        result.add(BoxHitTestEntry(this));
+        return true;
+      }
+    }
+
+    // 3. We hit ourselves
+    result.add(BoxHitTestEntry(this));
+    return true;
   }
 }

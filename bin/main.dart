@@ -1,7 +1,7 @@
 import 'package:flutter_terminal_layout/flutter_terminal_layout.dart';
-import 'mouse_app.dart';
+import 'counter_demo.dart';
 
 Future<void> main() async {
   // Clear screen first
-  await runApp(MouseApp());
+  await runApp(CounterApp());
 }

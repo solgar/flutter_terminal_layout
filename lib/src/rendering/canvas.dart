@@ -39,6 +39,7 @@ class Canvas {
   }
 
   void drawText(int x, int y, String text, {String? fg, String? bg}) {
+    int a = 3;
     for (int i = 0; i < text.length; i++) {
       setCell(x + i, y, text[i], fg: fg, bg: bg);
     }

@@ -15,6 +15,15 @@ abstract class StatelessWidget extends Widget {
   Widget build(BuildContext context);
 }
 
+abstract class StatefulWidget extends Widget {
+  const StatefulWidget();
+
+  @override
+  Element createElement() => StatefulElement(this);
+
+  State createState();
+}
+
 abstract class RenderObjectWidget extends Widget {
   const RenderObjectWidget();
 

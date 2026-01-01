@@ -45,4 +45,23 @@ abstract class RenderObject {
 
   /// Called when this object is attached to a parent.
   void attach(RenderObject owner) {}
+
+  /// Hit testing
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    // Default implementation assumes no interaction unless overridden
+    return false;
+  }
+}
+
+class BoxHitTestEntry {
+  final RenderObject target;
+  BoxHitTestEntry(this.target);
+}
+
+class BoxHitTestResult {
+  final List<BoxHitTestEntry> path = [];
+
+  void add(BoxHitTestEntry entry) {
+    path.add(entry);
+  }
 }

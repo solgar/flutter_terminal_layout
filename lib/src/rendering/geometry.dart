@@ -32,6 +32,7 @@ class Offset {
   static const Offset zero = Offset(0, 0);
 
   Offset operator +(Offset other) => Offset(dx + other.dx, dy + other.dy);
+  Offset operator -(Offset other) => Offset(dx - other.dx, dy - other.dy);
 
   @override
   String toString() => 'Offset($dx, $dy)';

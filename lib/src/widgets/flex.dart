@@ -4,23 +4,55 @@ import 'container.dart';
 import '../rendering/render_object.dart';
 import '../rendering/flex.dart';
 
+export '../rendering/flex.dart' show FlexDirection, CrossAxisAlignment;
+
 class Flex extends MultiChildRenderObjectWidget {
   final FlexDirection direction;
+  final CrossAxisAlignment crossAxisAlignment;
 
-  const Flex({super.children, required this.direction});
+  const Flex({
+    super.children,
+    required this.direction,
+    this.crossAxisAlignment = CrossAxisAlignment.start,
+  });
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return RenderFlex(direction: direction);
+    return RenderFlex(
+      direction: direction,
+      crossAxisAlignment: crossAxisAlignment,
+    );
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    covariant RenderFlex renderObject,
+  ) {
+    renderObject.direction = direction;
+    renderObject.crossAxisAlignment = crossAxisAlignment;
   }
 }
 
 class Row extends Flex {
-  const Row({super.children}) : super(direction: FlexDirection.horizontal);
+  const Row({
+    super.children,
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment
+        .center, // Default roughly center (or start in terminal)
+  }) : super(
+         direction: FlexDirection.horizontal,
+         crossAxisAlignment: crossAxisAlignment,
+       );
 }
 
 class Column extends Flex {
-  const Column({super.children}) : super(direction: FlexDirection.vertical);
+  const Column({
+    super.children,
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
+  }) : super(
+         direction: FlexDirection.vertical,
+         crossAxisAlignment: crossAxisAlignment,
+       );
 }
 
 class Expanded extends SingleChildRenderObjectWidget {

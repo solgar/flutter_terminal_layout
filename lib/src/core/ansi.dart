@@ -16,6 +16,12 @@ class Ansi {
   static const String enableAltBuffer = '$esc[?1049h';
   static const String disableAltBuffer = '$esc[?1049l';
 
+  // Mouse
+  // 1000h: Click tracking
+  // 1006h: SGR extended coordinates
+  static const String enableMouse = '$esc[?1000h$esc[?1006h';
+  static const String disableMouse = '$esc[?1000l$esc[?1006l';
+
   // Colors - Foreground
   static const String reset = '$esc[0m';
   static const String white = '$esc[37m';

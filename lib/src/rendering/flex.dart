@@ -6,22 +6,37 @@ import 'dart:math' as math;
 
 enum FlexDirection { horizontal, vertical }
 
+enum CrossAxisAlignment { start, end, center, stretch }
+
 class FlexParentData extends ParentData {
   int? flex;
   Offset offset = Offset.zero;
 }
 
 class RenderFlex extends RenderObject {
-  final FlexDirection direction;
+  FlexDirection direction;
+  CrossAxisAlignment crossAxisAlignment;
   final List<RenderObject> children = [];
 
-  RenderFlex({this.direction = FlexDirection.horizontal});
+  RenderFlex({
+    this.direction = FlexDirection.horizontal,
+    this.crossAxisAlignment =
+        CrossAxisAlignment.start, // Default to start for now
+  });
 
   void add(RenderObject child) {
+    if (children.contains(child)) return;
     children.add(child);
     child.parent = this;
     setupParentData(child);
     child.attach(this);
+  }
+
+  void removeAll() {
+    for (final child in children) {
+      child.parent = null;
+    }
+    children.clear();
   }
 
   @override
@@ -42,14 +57,33 @@ class RenderFlex extends RenderObject {
       final pd = child.parentData as FlexParentData;
       if (pd.flex == null || pd.flex == 0) {
         BoxConstraints innerConstraints;
+
+        // Determine cross-axis constraints
+        int minCross = 0;
+        int maxCross = (direction == FlexDirection.horizontal)
+            ? constraints.maxHeight
+            : constraints.maxWidth;
+
+        if (crossAxisAlignment == CrossAxisAlignment.stretch) {
+          // If we have a definite size in cross axis, force it.
+          // If cross axis is unboundedMain (e.g. Column in ScrollView), stretching might be bad or impossible?
+          // For standard cases (Row in Column), we usually have bounds.
+          minCross = maxCross;
+          // Ideally we should verify constraint is tight or bounded.
+          // If maxCross is infinite (unconstrained), stretch does nothing or error?
+          // Assuming bounded for terminal layout usually.
+        }
+
         if (direction == FlexDirection.horizontal) {
           innerConstraints = BoxConstraints(
             maxWidth: constraints.maxWidth,
-            maxHeight: constraints.maxHeight,
+            minHeight: minCross,
+            maxHeight: maxCross,
           );
         } else {
           innerConstraints = BoxConstraints(
-            maxWidth: constraints.maxWidth,
+            minWidth: minCross,
+            maxWidth: maxCross,
             maxHeight: constraints.maxHeight,
           );
         }
@@ -94,16 +128,28 @@ class RenderFlex extends RenderObject {
         final int flexSize = targetTotalSpace - currentFlexSpace;
         currentFlexSpace = targetTotalSpace;
 
+        // Determine cross-axis constraints
+        int minCross = 0;
+        int maxCross = (direction == FlexDirection.horizontal)
+            ? constraints.maxHeight
+            : constraints.maxWidth;
+
+        if (crossAxisAlignment == CrossAxisAlignment.stretch) {
+          minCross = maxCross;
+        }
+
         BoxConstraints innerConstraints;
         if (direction == FlexDirection.horizontal) {
           innerConstraints = BoxConstraints(
             minWidth: flexSize,
             maxWidth: flexSize,
-            maxHeight: constraints.maxHeight,
+            minHeight: minCross,
+            maxHeight: maxCross,
           );
         } else {
           innerConstraints = BoxConstraints(
-            maxWidth: constraints.maxWidth,
+            minWidth: minCross,
+            maxWidth: maxCross,
             minHeight: flexSize,
             maxHeight: flexSize, // Force exact height
           );
@@ -122,8 +168,18 @@ class RenderFlex extends RenderObject {
 
     // 4. Set size
     if (direction == FlexDirection.horizontal) {
+      // If expanding or stretch, we might take full cross height?
+      // If crossAxisAlignment is stretch, and we have tight constraint, we are that height.
+      // Else we are max(children).
+      // If parent gave us tight height, we are that height regardless.
+      // constraints.constrain() will handle tight constraints.
+
       int width = (totalFlex > 0) ? constraints.maxWidth : allocatedMain;
       if (width > 10000) width = allocatedMain;
+
+      // If stretch, crossSize should be constraints.maxHeight?
+      // But crossSize was calculated from children. If we stretched, children are that size.
+      // Note: if children are stretched, crossSize == maxCross == constraints.maxHeight.
 
       size = constraints.constrain(Size(width, crossSize));
     } else {
@@ -156,13 +212,50 @@ class RenderFlex extends RenderObject {
       child.paint(canvas, offset + pd.offset);
     }
   }
+
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    // 1. Check bounds
+    // Note: RenderFlex size is set in performLayout.
+    if (position.dx < 0 ||
+        position.dx >= size.width ||
+        position.dy < 0 ||
+        position.dy >= size.height) {
+      return false;
+    }
+
+    // 2. Test children (reverse order usually for Z-order, but simplified here)
+    for (int i = children.length - 1; i >= 0; i--) {
+      final child = children[i];
+      final pd = child.parentData as FlexParentData;
+      // Convert position to child's local coordinate system
+      final childPosition = position - pd.offset;
+      if (child.hitTest(result, position: childPosition)) {
+        result.add(BoxHitTestEntry(this));
+        return true;
+      }
+    }
+
+    // 3. Hit self
+    result.add(BoxHitTestEntry(this));
+    return true;
+  }
 }
 
 class RenderExpanded extends RenderObject {
   int flex;
   RenderExpanded({required this.flex});
 
-  RenderObject? child;
+  RenderObject? _child;
+  RenderObject? get child => _child;
+  set child(RenderObject? value) {
+    if (_child != null) _child!.parent = null;
+    _child = value;
+    if (_child != null) {
+      _child!.parent = this;
+      _child!.attach(this);
+    }
+  }
 
   @override
   void performLayout() {
@@ -177,6 +270,20 @@ class RenderExpanded extends RenderObject {
   @override
   void paint(Canvas canvas, Offset offset) {
     child?.paint(canvas, offset);
+  }
+
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    // Expanded is just a wrapper, usually same size as child.
+    // Check bounds?
+    if (child != null) {
+      // Expanded delegates to child, usually assumes offset 0,0 locally
+      if (child!.hitTest(result, position: position)) {
+        result.add(BoxHitTestEntry(this));
+        return true;
+      }
+    }
+    return false;
   }
 
   @override

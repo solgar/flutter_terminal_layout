@@ -4,21 +4,31 @@ import 'dart:io';
 class Terminal {
   bool _isRaw = false;
 
+  Stream<List<int>> get input => stdin;
+
   void enableRawMode() {
-    if (stdin.hasTerminal) {
-      // Echo mode: false (don't print keys as they are typed)
-      // Line mode: false (send input immediately, don't wait for enter)
-      stdin.echoMode = false;
-      stdin.lineMode = false;
-      _isRaw = true;
+    try {
+      if (stdin.hasTerminal) {
+        // Echo mode: false (don't print keys as they are typed)
+        // Line mode: false (send input immediately, don't wait for enter)
+        stdin.echoMode = false;
+        stdin.lineMode = false;
+        _isRaw = true;
+      }
+    } catch (_) {
+      // Ignore if socket closed or not a terminal
     }
   }
 
   void disableRawMode() {
-    if (stdin.hasTerminal) {
-      stdin.echoMode = true;
-      stdin.lineMode = true;
-      _isRaw = false;
+    try {
+      if (stdin.hasTerminal) {
+        stdin.echoMode = true;
+        stdin.lineMode = true;
+        _isRaw = false;
+      }
+    } catch (_) {
+      // Ignore if socket closed or not a terminal
     }
   }
 
