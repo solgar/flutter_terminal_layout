@@ -5,15 +5,17 @@ class Cell {
   String char;
   String? fgColor;
   String? bgColor;
+  bool isBorder;
 
-  Cell(this.char, {this.fgColor, this.bgColor});
+  Cell(this.char, {this.fgColor, this.bgColor, this.isBorder = false});
 
-  Cell.empty() : char = ' ';
+  Cell.empty() : char = ' ', isBorder = false;
 
   void reset() {
     char = ' ';
     fgColor = null;
     bgColor = null;
+    isBorder = false;
   }
 }
 
@@ -55,7 +57,50 @@ class Canvas {
     _clipStack[_clipStack.length - 1] = current.intersect(rect);
   }
 
-  void setCell(int x, int y, String char, {String? fg, String? bg}) {
+  // N=1, E=2, S=4, W=8
+  static const Map<String, int> _charToMask = {
+    '│': 5,
+    '║': 5,
+    '╎': 5,
+    '─': 10,
+    '═': 10,
+    '╌': 10,
+    '┌': 6,
+    '╔': 6,
+    '┐': 12,
+    '╗': 12,
+    '└': 3,
+    '╚': 3,
+    '┘': 9,
+    '╝': 9,
+    '├': 7,
+    '╠': 7,
+    '┤': 13,
+    '╣': 13,
+    '┬': 14,
+    '╦': 14,
+    '┴': 11,
+    '╩': 11,
+    '┼': 15,
+    '╬': 15,
+  };
+
+  static const Map<int, String> _maskToChar = {
+    5: '│', 10: '─',
+    6: '┌', 12: '┐', 3: '└', 9: '┘',
+    7: '├', 13: '┤', 14: '┬', 11: '┴', 15: '┼',
+    // Single lines (fallback)
+    1: '│', 4: '│', 2: '─', 8: '─', 0: ' ',
+  };
+
+  void setCell(
+    int x,
+    int y,
+    String char, {
+    String? fg,
+    String? bg,
+    bool isBorder = false,
+  }) {
     if (x < 0 || x >= width || y < 0 || y >= height) return;
 
     // Check clip
@@ -64,7 +109,31 @@ class Canvas {
     }
 
     final cell = _buffer[y][x];
-    cell.char = char;
+
+    if (isBorder && cell.isBorder) {
+      // Merge logic
+      final oldMask = _charToMask[cell.char] ?? 0;
+      final newMask = _charToMask[char] ?? 0;
+      if (oldMask != 0 && newMask != 0) {
+        final combined = oldMask | newMask;
+        cell.char = _maskToChar[combined] ?? char;
+      } else {
+        cell.char = char; // Non-mergeable border
+      }
+      cell.isBorder = true;
+    } else if (cell.isBorder && !isBorder && char == ' ') {
+      // If we are painting space (e.g. background fill) over a border,
+      // preserve the border character and only update background.
+      // This allows 'transparent' overlaps for border merging.
+      if (bg != null) cell.bgColor = bg;
+      return;
+    } else {
+      cell.char = char;
+      cell.isBorder = isBorder; // Update flag
+    }
+
+    // Determine colors: New color overrides old unless we want to do something smart?
+    // User probably wants the newest color.
     if (fg != null) cell.fgColor = fg;
     if (bg != null) cell.bgColor = bg;
   }

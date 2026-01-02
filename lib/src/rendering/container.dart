@@ -187,7 +187,7 @@ class RenderContainer extends RenderObject {
     if (border.top.style != BorderStyle.none) {
       final char = _horizontalChar(border.top.style);
       for (int x = left + 1; x < right; x++) {
-        canvas.setCell(x, top, char, fg: border.top.color);
+        canvas.setCell(x, top, char, fg: border.top.color, isBorder: true);
       }
     }
 
@@ -195,7 +195,13 @@ class RenderContainer extends RenderObject {
     if (border.bottom.style != BorderStyle.none) {
       final char = _horizontalChar(border.bottom.style);
       for (int x = left + 1; x < right; x++) {
-        canvas.setCell(x, bottom, char, fg: border.bottom.color);
+        canvas.setCell(
+          x,
+          bottom,
+          char,
+          fg: border.bottom.color,
+          isBorder: true,
+        );
       }
     }
 
@@ -203,7 +209,7 @@ class RenderContainer extends RenderObject {
     if (border.left.style != BorderStyle.none) {
       final char = _verticalChar(border.left.style);
       for (int y = top + 1; y < bottom; y++) {
-        canvas.setCell(left, y, char, fg: border.left.color);
+        canvas.setCell(left, y, char, fg: border.left.color, isBorder: true);
       }
     }
 
@@ -211,52 +217,53 @@ class RenderContainer extends RenderObject {
     if (border.right.style != BorderStyle.none) {
       final char = _verticalChar(border.right.style);
       for (int y = top + 1; y < bottom; y++) {
-        canvas.setCell(right, y, char, fg: border.right.color);
+        canvas.setCell(right, y, char, fg: border.right.color, isBorder: true);
       }
     }
 
-    // Corners
-    // Top-Left
-    if (border.top.style != BorderStyle.none &&
+    // Corners - Also isBorder!
+    // Top Left
+    if (border.top.style != BorderStyle.none ||
         border.left.style != BorderStyle.none) {
       canvas.setCell(
         left,
         top,
-        _topLeftChar(border.top.style),
-        fg: border.top.color,
+        _topLeftChar(border.top.style), // Or whichever style dominates
+        fg: border.top.color ?? border.left.color,
+        isBorder: true,
       );
     }
-
-    // Top-Right
-    if (border.top.style != BorderStyle.none &&
+    // Top Right
+    if (border.top.style != BorderStyle.none ||
         border.right.style != BorderStyle.none) {
       canvas.setCell(
         right,
         top,
         _topRightChar(border.top.style),
-        fg: border.top.color,
+        fg: border.top.color ?? border.right.color,
+        isBorder: true,
       );
     }
-
-    // Bottom-Left
-    if (border.bottom.style != BorderStyle.none &&
+    // Bottom Left
+    if (border.bottom.style != BorderStyle.none ||
         border.left.style != BorderStyle.none) {
       canvas.setCell(
         left,
         bottom,
         _bottomLeftChar(border.bottom.style),
-        fg: border.bottom.color,
+        fg: border.bottom.color ?? border.left.color,
+        isBorder: true,
       );
     }
-
-    // Bottom-Right
-    if (border.bottom.style != BorderStyle.none &&
+    // Bottom Right
+    if (border.bottom.style != BorderStyle.none ||
         border.right.style != BorderStyle.none) {
       canvas.setCell(
         right,
         bottom,
         _bottomRightChar(border.bottom.style),
-        fg: border.bottom.color,
+        fg: border.bottom.color ?? border.right.color,
+        isBorder: true,
       );
     }
   }
