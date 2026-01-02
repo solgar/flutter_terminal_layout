@@ -36,6 +36,8 @@ class Ansi {
 
   // Bright/Bold Colors
   static const String brightBlack = '$esc[90m'; // Dark Grey
+  static const String grey = '$esc[90m';
+  static const String darkGray = '$esc[90m';
   static const String brightRed = '$esc[91m';
   static const String brightGreen = '$esc[92m';
   static const String brightYellow = '$esc[93m';

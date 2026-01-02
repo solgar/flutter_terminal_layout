@@ -166,6 +166,12 @@ abstract class ComponentElement extends Element {
   void visitChildren(void Function(Element element) visitor) {
     if (_child != null) visitor(_child!);
   }
+
+  @override
+  void update(covariant Widget newWidget) {
+    super.update(newWidget);
+    rebuild();
+  }
 }
 
 class StatelessElement extends ComponentElement {

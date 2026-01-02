@@ -7,6 +7,7 @@ import 'focus_demo.dart';
 import 'gemini_app.dart';
 import 'layout_demo.dart';
 import 'list_demo.dart';
+import 'loading_demo.dart';
 import 'mouse_app.dart';
 
 class MainDemoApp extends StatefulWidget {
@@ -33,6 +34,7 @@ class _MainDemoAppState extends State<MainDemoApp> {
       MapEntry('Gemini TUI', () => const GeminiApp()),
       MapEntry('Layout Demo', () => const DemoApp()),
       MapEntry('List Demo', () => const ListDemoApp()),
+      MapEntry('Loading Demo', () => const LoadingDemo()),
       MapEntry('Mouse Demo', () => const MouseApp()),
     ];
   }
