@@ -5,6 +5,8 @@ export 'src/widgets/container.dart';
 export 'src/widgets/flex.dart';
 export 'src/widgets/keyboard_listener.dart';
 export 'src/widgets/listener.dart';
+export 'src/widgets/scroll_view.dart';
 export 'src/core/events.dart';
 export 'src/core/ansi.dart';
 export 'src/core/terminal.dart';
+export 'src/rendering/geometry.dart' show Alignment;

@@ -195,11 +195,28 @@ class RenderFlex extends RenderObject {
       final pd = child.parentData as FlexParentData;
       final childSize = child.size;
 
+      int crossOffset = 0;
+      if (crossAxisAlignment == CrossAxisAlignment.center) {
+        crossOffset =
+            ((crossSize -
+                        (direction == FlexDirection.horizontal
+                            ? childSize.height
+                            : childSize.width)) /
+                    2)
+                .round();
+      } else if (crossAxisAlignment == CrossAxisAlignment.end) {
+        crossOffset =
+            crossSize -
+            (direction == FlexDirection.horizontal
+                ? childSize.height
+                : childSize.width);
+      }
+
       if (direction == FlexDirection.horizontal) {
-        pd.offset = Offset(offsetMain, 0);
+        pd.offset = Offset(offsetMain, crossOffset);
         offsetMain += childSize.width;
       } else {
-        pd.offset = Offset(0, offsetMain);
+        pd.offset = Offset(crossOffset, offsetMain);
         offsetMain += childSize.height;
       }
     }

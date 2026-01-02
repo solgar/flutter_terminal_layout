@@ -37,8 +37,7 @@ class Flex extends MultiChildRenderObjectWidget {
 class Row extends Flex {
   const Row({
     super.children,
-    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment
-        .center, // Default roughly center (or start in terminal)
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
   }) : super(
          direction: FlexDirection.horizontal,
          crossAxisAlignment: crossAxisAlignment,
@@ -48,7 +47,7 @@ class Row extends Flex {
 class Column extends Flex {
   const Column({
     super.children,
-    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
   }) : super(
          direction: FlexDirection.vertical,
          crossAxisAlignment: crossAxisAlignment,

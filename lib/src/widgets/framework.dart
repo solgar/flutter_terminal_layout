@@ -20,6 +20,7 @@ abstract class Element implements BuildContext {
   bool _dirty = true;
 
   static final List<Element> _dirtyElements = [];
+  static void Function()? requestFrame;
 
   Element(this.widget);
 
@@ -35,6 +36,7 @@ abstract class Element implements BuildContext {
     if (!_dirty) {
       _dirty = true;
       _dirtyElements.add(this);
+      requestFrame?.call();
     }
   }
 
@@ -356,9 +358,12 @@ class TerminalApp {
 
     try {
       final element = app.createElement();
-      element.mount(null);
 
+      int lastFrameTime = 0; // Moved up
+      bool isFrameScheduled = false;
       void draw() {
+        isFrameScheduled = false;
+        lastFrameTime = DateTime.now().millisecondsSinceEpoch;
         // Build dirty elements
         if (Element._dirtyElements.isNotEmpty) {
           for (final dirty in List<Element>.of(Element._dirtyElements)) {
@@ -455,6 +460,23 @@ class TerminalApp {
         },
       );
 
+      const int targetFrameMs = 4;
+
+      Element.requestFrame = () {
+        if (!isFrameScheduled) {
+          isFrameScheduled = true;
+          final int now = DateTime.now().millisecondsSinceEpoch;
+          final int elapsed = now - lastFrameTime;
+
+          if (elapsed >= targetFrameMs) {
+            Timer.run(draw);
+          } else {
+            Timer(Duration(milliseconds: targetFrameMs - elapsed), draw);
+          }
+        }
+      };
+
+      element.mount(null);
       // Initial draw
       draw();
 

@@ -45,7 +45,8 @@ class _MouseAppState extends State<MouseApp> {
               },
               child: Container(
                 color: color,
-                child: Text(' $x,$y ', styleFg: Ansi.white),
+                // alignment: Alignment.center,
+                child: Text('$x,$y', styleFg: Ansi.white),
               ),
             ),
           ),
@@ -84,8 +85,4 @@ class _MouseAppState extends State<MouseApp> {
 
     return Column(children: rows);
   }
-}
-
-Future<void> main() async {
-  await runApp(MouseApp());
 }

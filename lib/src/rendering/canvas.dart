@@ -22,6 +22,9 @@ class Canvas {
   final int height;
   final List<List<Cell>> _buffer;
 
+  // Clipping state
+  List<Rect> _clipStack = [];
+
   Canvas(Size size)
     : width = size.width,
       height = size.height,
@@ -30,8 +33,36 @@ class Canvas {
         (_) => List.generate(size.width, (_) => Cell.empty()),
       );
 
+  void save() {
+    if (_clipStack.isEmpty) {
+      // Assume default clip is full screen
+      _clipStack.add(Rect.fromLTWH(0, 0, width, height));
+    }
+    _clipStack.add(_clipStack.last);
+  }
+
+  void restore() {
+    if (_clipStack.isNotEmpty) {
+      _clipStack.removeLast();
+    }
+  }
+
+  void clipRect(Rect rect) {
+    if (_clipStack.isEmpty) {
+      _clipStack.add(Rect.fromLTWH(0, 0, width, height));
+    }
+    final current = _clipStack.last;
+    _clipStack[_clipStack.length - 1] = current.intersect(rect);
+  }
+
   void setCell(int x, int y, String char, {String? fg, String? bg}) {
     if (x < 0 || x >= width || y < 0 || y >= height) return;
+
+    // Check clip
+    if (_clipStack.isNotEmpty) {
+      if (!_clipStack.last.contains(Offset(x, y))) return;
+    }
+
     final cell = _buffer[y][x];
     cell.char = char;
     if (fg != null) cell.fgColor = fg;
@@ -39,7 +70,8 @@ class Canvas {
   }
 
   void drawText(int x, int y, String text, {String? fg, String? bg}) {
-    int a = 3;
+    // Optimization to skip if y is totally out (requires Rect checks of range)
+    // For now simple per-char check in setCell works.
     for (int i = 0; i < text.length; i++) {
       setCell(x + i, y, text[i], fg: fg, bg: bg);
     }

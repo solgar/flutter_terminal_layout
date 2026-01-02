@@ -35,6 +35,15 @@ class BoxConstraints {
 
   bool get isTight => minWidth >= maxWidth && minHeight >= maxHeight;
 
+  BoxConstraints loosen() {
+    return BoxConstraints(
+      minWidth: 0,
+      maxWidth: maxWidth,
+      minHeight: 0,
+      maxHeight: maxHeight,
+    );
+  }
+
   @override
   String toString() =>
       'BoxConstraints($minWidth<=$maxWidth, $minHeight<=$maxHeight)';

@@ -7,7 +7,11 @@ class RenderContainer extends RenderObject {
   String? color;
   int? width;
   int? height;
+  Alignment? alignment;
   RenderObject? _child;
+
+  // Track child offset for paint/hitTest
+  Offset _childOffset = Offset.zero;
 
   RenderObject? get child => _child;
   set child(RenderObject? value) {
@@ -19,7 +23,13 @@ class RenderContainer extends RenderObject {
     }
   }
 
-  RenderContainer({this.color, this.width, this.height, RenderObject? child}) {
+  RenderContainer({
+    this.color,
+    this.width,
+    this.height,
+    this.alignment,
+    RenderObject? child,
+  }) {
     if (child != null) {
       this.child = child;
     }
@@ -55,8 +65,27 @@ class RenderContainer extends RenderObject {
     );
 
     if (child != null) {
-      child!.layout(effConstraints, parentUsesSize: true);
-      size = child!.size;
+      if (alignment != null) {
+        // If alignment is present, loosen constraints for child
+        child!.layout(effConstraints.loosen(), parentUsesSize: true);
+
+        // Container expands to fill available space if allowed
+        int w = (width != null) ? width! : maxW;
+        int h = (height != null) ? height! : maxH;
+
+        // Handle unbounded max (pseudo-unbounded 100000)
+        if (w >= 100000) w = child!.size.width;
+        if (h >= 100000) h = child!.size.height;
+
+        size = constraints.constrain(Size(w, h));
+
+        // Calculate offset
+        _childOffset = alignment!.alongSize(size, child!.size);
+      } else {
+        child!.layout(effConstraints, parentUsesSize: true);
+        size = child!.size;
+        _childOffset = Offset.zero;
+      }
     } else {
       int w = (width != null)
           ? width!
@@ -66,6 +95,7 @@ class RenderContainer extends RenderObject {
           : (effConstraints.maxHeight == 100000 ? 0 : effConstraints.maxHeight);
 
       size = effConstraints.constrain(Size(w, h));
+      _childOffset = Offset.zero;
     }
 
     // Final clamp
@@ -79,7 +109,7 @@ class RenderContainer extends RenderObject {
     }
 
     if (child != null) {
-      child!.paint(canvas, offset);
+      child!.paint(canvas, offset + _childOffset);
     }
   }
 
@@ -93,14 +123,11 @@ class RenderContainer extends RenderObject {
       return false;
     }
 
-    // 2. Test children (children first)
-    // Container has single child, coordinates are typically (0,0) relative to self unless padded?
-    // Container paint calls child at offset (which is self offset).
-    // wait, layout determines child position inside container.
-    // In this simplified model, paint(canvas, offset) passes 'offset' to child.
-    // This implies child is at (0,0) relative to container.
+    // 2. Test children
     if (child != null) {
-      if (child!.hitTest(result, position: position)) {
+      // Adjust position for child offset
+      final childPos = position - _childOffset;
+      if (child!.hitTest(result, position: childPos)) {
         result.add(BoxHitTestEntry(this));
         return true;
       }
