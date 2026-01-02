@@ -9,11 +9,13 @@ export '../rendering/flex.dart' show FlexDirection, CrossAxisAlignment;
 class Flex extends MultiChildRenderObjectWidget {
   final FlexDirection direction;
   final CrossAxisAlignment crossAxisAlignment;
+  final int spacing;
 
   const Flex({
     super.children,
     required this.direction,
     this.crossAxisAlignment = CrossAxisAlignment.start,
+    this.spacing = 0,
   });
 
   @override
@@ -21,6 +23,7 @@ class Flex extends MultiChildRenderObjectWidget {
     return RenderFlex(
       direction: direction,
       crossAxisAlignment: crossAxisAlignment,
+      spacing: spacing,
     );
   }
 
@@ -31,6 +34,7 @@ class Flex extends MultiChildRenderObjectWidget {
   ) {
     renderObject.direction = direction;
     renderObject.crossAxisAlignment = crossAxisAlignment;
+    renderObject.spacing = spacing;
   }
 }
 
@@ -38,9 +42,11 @@ class Row extends Flex {
   const Row({
     super.children,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
+    int spacing = 0,
   }) : super(
          direction: FlexDirection.horizontal,
          crossAxisAlignment: crossAxisAlignment,
+         spacing: spacing,
        );
 }
 
@@ -48,9 +54,11 @@ class Column extends Flex {
   const Column({
     super.children,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
+    int spacing = 0,
   }) : super(
          direction: FlexDirection.vertical,
          crossAxisAlignment: crossAxisAlignment,
+         spacing: spacing,
        );
 }
 

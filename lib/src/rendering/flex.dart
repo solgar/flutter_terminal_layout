@@ -16,12 +16,14 @@ class FlexParentData extends ParentData {
 class RenderFlex extends RenderObject {
   FlexDirection direction;
   CrossAxisAlignment crossAxisAlignment;
+  int spacing;
   final List<RenderObject> children = [];
 
   RenderFlex({
     this.direction = FlexDirection.horizontal,
     this.crossAxisAlignment =
         CrossAxisAlignment.start, // Default to start for now
+    this.spacing = 0,
   });
 
   void add(RenderObject child) {
@@ -65,18 +67,12 @@ class RenderFlex extends RenderObject {
             : constraints.maxWidth;
 
         if (crossAxisAlignment == CrossAxisAlignment.stretch) {
-          // If we have a definite size in cross axis, force it.
-          // If cross axis is unboundedMain (e.g. Column in ScrollView), stretching might be bad or impossible?
-          // For standard cases (Row in Column), we usually have bounds.
           minCross = maxCross;
-          // Ideally we should verify constraint is tight or bounded.
-          // If maxCross is infinite (unconstrained), stretch does nothing or error?
-          // Assuming bounded for terminal layout usually.
         }
 
         if (direction == FlexDirection.horizontal) {
           innerConstraints = BoxConstraints(
-            maxWidth: 100000, // Unbounded main axis for non-flex children
+            maxWidth: 100000,
             minHeight: minCross,
             maxHeight: maxCross,
           );
@@ -84,7 +80,7 @@ class RenderFlex extends RenderObject {
           innerConstraints = BoxConstraints(
             minWidth: minCross,
             maxWidth: maxCross,
-            maxHeight: 100000, // Unbounded main axis for non-flex children
+            maxHeight: 100000,
           );
         }
 
@@ -109,7 +105,12 @@ class RenderFlex extends RenderObject {
     final maxMain = (direction == FlexDirection.horizontal
         ? constraints.maxWidth
         : constraints.maxHeight);
-    final remainingSpace = math.max(0, maxMain - allocatedMain);
+
+    final int totalSpacing = (children.length > 1)
+        ? (children.length - 1) * spacing
+        : 0;
+
+    final remainingSpace = math.max(0, maxMain - allocatedMain - totalSpacing);
 
     // 3. Layout flex children
     int allocatedFlexParams = 0;
@@ -120,15 +121,12 @@ class RenderFlex extends RenderObject {
       if (pd.flex != null && pd.flex! > 0) {
         allocatedFlexParams += pd.flex!;
 
-        // Calculate target space for *all* flex items up to this one,
-        // then subtract what we've already allocated.
         final int targetTotalSpace = (totalFlex > 0)
             ? (remainingSpace * allocatedFlexParams / totalFlex).round()
             : 0;
         final int flexSize = targetTotalSpace - currentFlexSpace;
         currentFlexSpace = targetTotalSpace;
 
-        // Determine cross-axis constraints
         int minCross = 0;
         int maxCross = (direction == FlexDirection.horizontal)
             ? constraints.maxHeight
@@ -151,7 +149,7 @@ class RenderFlex extends RenderObject {
             minWidth: minCross,
             maxWidth: maxCross,
             minHeight: flexSize,
-            maxHeight: flexSize, // Force exact height
+            maxHeight: flexSize,
           );
         }
 
@@ -168,24 +166,12 @@ class RenderFlex extends RenderObject {
 
     // 4. Set size
     if (direction == FlexDirection.horizontal) {
-      // If expanding or stretch, we might take full cross height?
-      // If crossAxisAlignment is stretch, and we have tight constraint, we are that height.
-      // Else we are max(children).
-      // If parent gave us tight height, we are that height regardless.
-      // constraints.constrain() will handle tight constraints.
-
       int width = (totalFlex > 0) ? constraints.maxWidth : allocatedMain;
       if (width > 10000) width = allocatedMain;
-
-      // If stretch, crossSize should be constraints.maxHeight?
-      // But crossSize was calculated from children. If we stretched, children are that size.
-      // Note: if children are stretched, crossSize == maxCross == constraints.maxHeight.
-
       size = constraints.constrain(Size(width, crossSize));
     } else {
       int height = (totalFlex > 0) ? constraints.maxHeight : allocatedMain;
       if (height > 10000) height = allocatedMain;
-
       size = constraints.constrain(Size(crossSize, height));
     }
 
@@ -214,10 +200,10 @@ class RenderFlex extends RenderObject {
 
       if (direction == FlexDirection.horizontal) {
         pd.offset = Offset(offsetMain, crossOffset);
-        offsetMain += childSize.width;
+        offsetMain += childSize.width + spacing;
       } else {
         pd.offset = Offset(crossOffset, offsetMain);
-        offsetMain += childSize.height;
+        offsetMain += childSize.height + spacing;
       }
     }
   }
