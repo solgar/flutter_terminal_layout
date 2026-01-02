@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_terminal_layout/flutter_terminal_layout.dart';
+import 'mouse_app.dart';
 
 class ListDemoApp extends StatefulWidget {
   @override
@@ -32,12 +33,10 @@ class _ListDemoAppState extends State<ListDemoApp> {
         Expanded(child: _buildListSection()),
         Expanded(
           child: Column(
+            crossAxisAlignment: .stretch,
             children: [
               Expanded(
-                child: Container(
-                  color: Ansi.bgGreen,
-                  child: Text("Right side"),
-                ),
+                child: Container(color: Ansi.bgBlack, child: MouseApp()),
               ),
             ],
           ),
