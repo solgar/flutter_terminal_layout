@@ -3,6 +3,7 @@ import 'package:flutter_terminal_layout/flutter_terminal_layout.dart';
 // import 'package:flutter_terminal_layout/src/widgets/rich_text.dart';
 
 class GeminiApp extends StatefulWidget {
+  const GeminiApp({super.key});
   @override
   State<GeminiApp> createState() => _GeminiAppState();
 }

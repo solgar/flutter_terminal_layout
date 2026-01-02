@@ -6,7 +6,7 @@ import '../rendering/geometry.dart';
 import '../rendering/constraints.dart';
 
 class Stack extends MultiChildRenderObjectWidget {
-  const Stack({super.children});
+  const Stack({super.key, super.children});
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -28,6 +28,7 @@ class Positioned extends SingleChildRenderObjectWidget {
   final int? height;
 
   const Positioned({
+    super.key,
     super.child,
     this.left,
     this.top,

@@ -5,6 +5,7 @@ void main() {
 }
 
 class ClaudeCodeApp extends StatelessWidget {
+  const ClaudeCodeApp({super.key});
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -147,7 +148,7 @@ class ClaudeCodeApp extends StatelessWidget {
 class RecentActivityRow extends StatelessWidget {
   final String time;
   final String desc;
-  RecentActivityRow(this.time, this.desc);
+  const RecentActivityRow(this.time, this.desc, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -172,6 +173,7 @@ Widget _buildRecentActivityRow(String time, String action) {
 }
 
 class ClaudeHeader extends StatelessWidget {
+  const ClaudeHeader({super.key});
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -184,6 +186,7 @@ class ClaudeHeader extends StatelessWidget {
 }
 
 class PixelArtLogo extends StatelessWidget {
+  const PixelArtLogo({super.key});
   @override
   Widget build(BuildContext context) {
     final color = Ansi.brightRed; // Brighter Orange/Red

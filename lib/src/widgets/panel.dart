@@ -13,6 +13,7 @@ class Panel extends StatelessWidget {
   final EdgeInsets? padding;
 
   const Panel({
+    super.key,
     this.child,
     this.flex = 0,
     this.width,
@@ -47,6 +48,7 @@ class VPanel extends Panel {
   final CrossAxisAlignment crossAxisAlignment;
 
   const VPanel({
+    super.key,
     required this.children,
     super.flex,
     super.width,
@@ -86,6 +88,7 @@ class HPanel extends Panel {
   final CrossAxisAlignment crossAxisAlignment;
 
   const HPanel({
+    super.key,
     required this.children,
     super.flex,
     super.width,

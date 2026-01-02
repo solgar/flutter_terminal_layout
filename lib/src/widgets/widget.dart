@@ -1,13 +1,34 @@
 import '../rendering/render_object.dart';
 import 'framework.dart';
 
+import 'package:meta/meta.dart';
+
+@immutable
+class Key {
+  final String? value;
+  const Key(this.value);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Key && other.value == value;
+  }
+
+  @override
+  int get hashCode => value.hashCode;
+
+  @override
+  String toString() => 'Key($value)';
+}
+
 abstract class Widget {
-  const Widget();
+  final Key? key;
+  const Widget({this.key});
   Element createElement();
 }
 
 abstract class StatelessWidget extends Widget {
-  const StatelessWidget();
+  const StatelessWidget({super.key});
 
   @override
   Element createElement() => StatelessElement(this);
@@ -16,7 +37,7 @@ abstract class StatelessWidget extends Widget {
 }
 
 abstract class StatefulWidget extends Widget {
-  const StatefulWidget();
+  const StatefulWidget({super.key});
 
   @override
   Element createElement() => StatefulElement(this);
@@ -24,8 +45,22 @@ abstract class StatefulWidget extends Widget {
   State createState();
 }
 
+abstract class ProxyWidget extends Widget {
+  final Widget child;
+  const ProxyWidget({super.key, required this.child});
+}
+
+abstract class InheritedWidget extends ProxyWidget {
+  const InheritedWidget({super.key, required super.child});
+
+  @override
+  Element createElement() => InheritedElement(this);
+
+  bool updateShouldNotify(covariant InheritedWidget oldWidget);
+}
+
 abstract class RenderObjectWidget extends Widget {
-  const RenderObjectWidget();
+  const RenderObjectWidget({super.key});
 
   @override
   Element createElement();
@@ -39,7 +74,7 @@ abstract class RenderObjectWidget extends Widget {
 
 class SingleChildRenderObjectWidget extends RenderObjectWidget {
   final Widget? child;
-  const SingleChildRenderObjectWidget({this.child});
+  const SingleChildRenderObjectWidget({super.key, this.child});
 
   @override
   Element createElement() => SingleChildRenderObjectElement(this);
@@ -52,7 +87,7 @@ class SingleChildRenderObjectWidget extends RenderObjectWidget {
 
 class MultiChildRenderObjectWidget extends RenderObjectWidget {
   final List<Widget> children;
-  const MultiChildRenderObjectWidget({this.children = const []});
+  const MultiChildRenderObjectWidget({super.key, this.children = const []});
 
   @override
   Element createElement() => MultiChildRenderObjectElement(this);

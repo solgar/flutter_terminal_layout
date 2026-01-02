@@ -6,7 +6,11 @@ class KeyboardListener extends StatefulWidget {
   final Widget child;
   final void Function(List<int>) onKeyEvent;
 
-  const KeyboardListener({required this.child, required this.onKeyEvent});
+  const KeyboardListener({
+    super.key,
+    required this.child,
+    required this.onKeyEvent,
+  });
 
   @override
   State<KeyboardListener> createState() => _KeyboardListenerState();

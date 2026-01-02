@@ -12,6 +12,7 @@ class Flex extends MultiChildRenderObjectWidget {
   final int spacing;
 
   const Flex({
+    super.key,
     super.children,
     required this.direction,
     this.crossAxisAlignment = CrossAxisAlignment.start,
@@ -40,6 +41,7 @@ class Flex extends MultiChildRenderObjectWidget {
 
 class Row extends Flex {
   const Row({
+    super.key,
     super.children,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
     int spacing = 0,
@@ -52,6 +54,7 @@ class Row extends Flex {
 
 class Column extends Flex {
   const Column({
+    super.key,
     super.children,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
     int spacing = 0,
@@ -65,7 +68,7 @@ class Column extends Flex {
 class Expanded extends SingleChildRenderObjectWidget {
   final int flex;
 
-  const Expanded({super.child, this.flex = 1});
+  const Expanded({super.key, super.child, this.flex = 1});
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -84,7 +87,7 @@ class Expanded extends SingleChildRenderObjectWidget {
 
 class Spacer extends StatelessWidget {
   final int flex;
-  const Spacer({this.flex = 1});
+  const Spacer({super.key, this.flex = 1});
 
   @override
   Widget build(BuildContext context) {

@@ -13,3 +13,4 @@ export 'src/rendering/geometry.dart' show Alignment;
 export 'src/widgets/rich_text.dart';
 export 'src/widgets/text_field.dart';
 export 'src/widgets/panel.dart';
+export 'src/widgets/focus.dart';

@@ -13,6 +13,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
   final Alignment alignment;
 
   const OverflowBox({
+    super.key,
     super.child,
     this.minWidth,
     this.maxWidth,

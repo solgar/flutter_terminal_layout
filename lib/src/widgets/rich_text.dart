@@ -2,7 +2,7 @@ import 'framework.dart';
 import 'widget.dart';
 import '../rendering/render_object.dart';
 import '../rendering/canvas.dart';
-import '../core/ansi.dart';
+
 import '../rendering/geometry.dart';
 
 /// An immutable span of text.
@@ -42,7 +42,7 @@ class TextSpan {
 class RichText extends RenderObjectWidget {
   final TextSpan text;
 
-  const RichText({required this.text});
+  const RichText({super.key, required this.text});
 
   @override
   Element createElement() => LeafRenderObjectElement(this);

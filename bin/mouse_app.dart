@@ -1,6 +1,7 @@
 import 'package:flutter_terminal_layout/flutter_terminal_layout.dart';
 
 class MouseApp extends StatefulWidget {
+  const MouseApp({super.key});
   @override
   State<MouseApp> createState() => _MouseAppState();
 }

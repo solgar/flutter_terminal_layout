@@ -25,6 +25,7 @@ class TextField extends StatefulWidget {
   final String? placeholder;
 
   const TextField({
+    super.key,
     this.controller,
     this.onSubmitted,
     this.decorationPrefix,

@@ -12,3 +12,14 @@ class PointerDownEvent extends PointerEvent {
 class PointerUpEvent extends PointerEvent {
   const PointerUpEvent({required super.position});
 }
+
+abstract class KeyEvent {
+  const KeyEvent();
+}
+
+class KeyDownEvent extends KeyEvent {
+  final List<int> bytes;
+  const KeyDownEvent(this.bytes);
+
+  String get character => String.fromCharCodes(bytes);
+}

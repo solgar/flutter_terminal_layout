@@ -3,6 +3,7 @@ import 'package:flutter_terminal_layout/flutter_terminal_layout.dart';
 import 'mouse_app.dart';
 
 class ListDemoApp extends StatefulWidget {
+  const ListDemoApp({super.key});
   @override
   State<ListDemoApp> createState() => _ListDemoAppState();
 }

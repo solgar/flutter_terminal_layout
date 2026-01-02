@@ -1,6 +1,7 @@
 import 'package:flutter_terminal_layout/flutter_terminal_layout.dart';
 
 class CounterApp extends StatefulWidget {
+  const CounterApp({super.key});
   @override
   State<CounterApp> createState() => _CounterAppState();
 }

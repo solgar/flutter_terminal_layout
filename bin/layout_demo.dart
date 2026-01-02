@@ -2,6 +2,7 @@ import 'package:flutter_terminal_layout/flutter_terminal_layout.dart';
 import 'dart:io';
 
 class DemoApp extends StatelessWidget {
+  const DemoApp({super.key});
   @override
   Widget build(BuildContext context) {
     return Column(

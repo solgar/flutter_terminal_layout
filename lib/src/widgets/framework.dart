@@ -11,18 +11,28 @@ import '../rendering/proxy.dart';
 import '../core/events.dart';
 import '../core/terminal.dart';
 import '../core/ansi.dart';
+
 import 'widget.dart';
+import 'focus.dart';
 import 'dart:io';
 import 'dart:async';
 
 abstract class BuildContext {
   Widget get widget;
+  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>();
+  InheritedWidget dependOnInheritedElement(
+    InheritedElement ancestor, {
+    Object? aspect,
+  });
 }
 
 abstract class Element implements BuildContext {
   Widget widget;
   Element? _parent;
   bool _dirty = true;
+
+  Map<Type, InheritedElement>? _inheritedWidgets;
+  Set<InheritedElement>? _dependencies;
 
   static final List<Element> _dirtyElements = [];
   static void Function()? requestFrame;
@@ -31,6 +41,18 @@ abstract class Element implements BuildContext {
 
   void mount(Element? parent) {
     _parent = parent;
+    _inheritedWidgets = parent?._inheritedWidgets;
+  }
+
+  void unmount() {
+    _parent = null;
+    _inheritedWidgets = null;
+    if (_dependencies != null) {
+      for (final dependency in _dependencies!) {
+        dependency.removeDependent(this);
+      }
+      _dependencies = null;
+    }
   }
 
   void update(covariant Widget newWidget) {
@@ -55,17 +77,18 @@ abstract class Element implements BuildContext {
   Element? updateChild(Element? child, Widget? newWidget, dynamic newSlot) {
     if (newWidget == null) {
       if (child != null) {
-        // child.unmount(); // Unmount not implemented
+        child.unmount();
       }
       return null;
     }
 
     if (child != null) {
-      if (child.widget.runtimeType == newWidget.runtimeType) {
+      if (child.widget.runtimeType == newWidget.runtimeType &&
+          child.widget.key == newWidget.key) {
         child.update(newWidget);
         return child;
       }
-      // child.unmount();
+      child.unmount();
     }
 
     final newChild = newWidget.createElement();
@@ -85,6 +108,30 @@ abstract class Element implements BuildContext {
     }
     return (current as RenderObjectElement)._renderObject;
   }
+
+  @override
+  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>() {
+    final ancestor = _inheritedWidgets?[T];
+    if (ancestor != null) {
+      return dependOnInheritedElement(ancestor) as T?;
+    }
+    return null;
+  }
+
+  @override
+  InheritedWidget dependOnInheritedElement(
+    InheritedElement ancestor, {
+    Object? aspect,
+  }) {
+    _dependencies ??= {};
+    _dependencies!.add(ancestor);
+    ancestor.updateDependencies(this, aspect);
+    return ancestor.widget as InheritedWidget;
+  }
+
+  void didChangeDependencies() {
+    markNeedsBuild();
+  }
 }
 
 abstract class ComponentElement extends Element {
@@ -95,6 +142,12 @@ abstract class ComponentElement extends Element {
   void mount(Element? parent) {
     super.mount(parent);
     _firstBuild();
+  }
+
+  @override
+  void unmount() {
+    _child?.unmount();
+    super.unmount();
   }
 
   void _firstBuild() {
@@ -128,6 +181,11 @@ abstract class State<T extends StatefulWidget> {
   BuildContext get context => _element!;
   StatefulElement? _element;
   bool _mounted = false;
+
+  void didChangeDependencies() {
+    _element!.markNeedsBuild();
+  }
+
   bool get mounted => _mounted;
 
   void initState() {}
@@ -162,6 +220,13 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
+  void unmount() {
+    _state.dispose();
+    _state._mounted = false;
+    super.unmount();
+  }
+
+  @override
   Widget build() => _state.build(this);
 
   @override
@@ -184,8 +249,31 @@ abstract class RenderObjectElement extends Element {
     super.mount(parent);
     _renderObject = (widget as RenderObjectWidget).createRenderObject(this);
     if (widget is RenderObjectWidget) {
-      (widget as RenderObjectWidget).updateRenderObject(this, _renderObject!);
+      // (widget as RenderObjectWidget).updateRenderObject(this, _renderObject!);
     }
+    // Update happened in create or we call it here?
+    // Flutter calls updateRenderObject after create generally to apply fields.
+    (widget as RenderObjectWidget).updateRenderObject(this, _renderObject!);
+
+    // Attach to parent render object?
+    // No, standard flow relies on mount of child to attach itself?
+    // Or we attach here?
+    // In this simplified framework, we might need manual attach.
+  }
+
+  @override
+  void unmount() {
+    // Detach render object from parent?
+    // _renderObject?.detach();
+    // We don't have detach on RenderObject yet, maybe we should?
+    // For now the parent RenderObject (MultiChild etc) usually clears children or we rely on re-layout.
+    // But we should probably actively detach.
+    // Let's implement basic detach if parent is RenderObject.
+    if (_renderObject != null && _renderObject!.parent != null) {
+      // Only some parents support detach like this?
+      // _renderObject!.parent!.detachChild(_renderObject!);
+    }
+    super.unmount();
   }
 
   @override
@@ -217,6 +305,12 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
       _child = updateChild(null, widgetChild, null);
     }
     _attachChildRenderObject();
+  }
+
+  @override
+  void unmount() {
+    super.unmount();
+    _child?.unmount();
   }
 
   @override
@@ -313,6 +407,14 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   }
 
   @override
+  void unmount() {
+    for (final child in _children) {
+      child.unmount();
+    }
+    super.unmount();
+  }
+
+  @override
   void visitChildren(void Function(Element element) visitor) {
     for (final child in _children) {
       visitor(child);
@@ -320,8 +422,80 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   }
 }
 
+abstract class ProxyElement extends ComponentElement {
+  ProxyElement(ProxyWidget super.widget);
+
+  @override
+  Widget build() => (widget as ProxyWidget).child;
+
+  @override
+  void update(ProxyWidget newWidget) {
+    final oldWidget = widget as ProxyWidget;
+    super.update(newWidget);
+    updated(oldWidget);
+    _dirty = true;
+    performRebuild();
+  }
+
+  void updated(covariant ProxyWidget oldWidget) {
+    notifyClients(oldWidget);
+  }
+
+  void notifyClients(covariant ProxyWidget oldWidget);
+}
+
+class InheritedElement extends ProxyElement {
+  InheritedElement(InheritedWidget super.widget);
+
+  final Map<Element, Object?> _dependents = {};
+
+  @override
+  void mount(Element? parent) {
+    final parentWidgets = parent?._inheritedWidgets;
+    _inheritedWidgets = parentWidgets == null
+        ? {}
+        : Map<Type, InheritedElement>.from(parentWidgets);
+    _inheritedWidgets![widget.runtimeType] = this;
+    super.mount(parent);
+  }
+
+  @override
+  void updated(InheritedWidget oldWidget) {
+    if ((widget as InheritedWidget).updateShouldNotify(oldWidget)) {
+      super.updated(oldWidget);
+    }
+  }
+
+  @override
+  void notifyClients(InheritedWidget oldWidget) {
+    for (final dependent in _dependents.keys) {
+      dependent.didChangeDependencies();
+    }
+  }
+
+  void updateDependencies(Element dependent, Object? aspect) {
+    _dependents[dependent] = aspect;
+  }
+
+  void removeDependent(Element dependent) {
+    _dependents.remove(dependent);
+  }
+}
+
 class TerminalApp {
+  static final TerminalApp instance = TerminalApp._();
+  TerminalApp._();
+  factory TerminalApp() => instance;
+
   final Terminal _terminal = Terminal();
+
+  Completer<void>? _exitCompleter;
+
+  void stop() {
+    if (_exitCompleter != null && !_exitCompleter!.isCompleted) {
+      _exitCompleter!.complete();
+    }
+  }
 
   static final StreamController<List<int>> _inputController =
       StreamController<List<int>>.broadcast(sync: true);
@@ -332,6 +506,7 @@ class TerminalApp {
   StreamSubscription? signalSub;
 
   Future<void> run(Widget app) async {
+    _exitCompleter = Completer<void>();
     _terminal.enableRawMode();
 
     stdout.write(Ansi.hideCursor);
@@ -391,8 +566,6 @@ class TerminalApp {
         }
       }
 
-      final exitCompleter = Completer<void>();
-
       // Handle system signals (SIGINT)
       signalSub = ProcessSignal.sigint.watch().listen((signal) {
         restoreTerminal();
@@ -417,8 +590,9 @@ class TerminalApp {
       inputSub = _terminal.input.listen(
         (input) {
           if (input.contains(3)) {
-            if (!exitCompleter.isCompleted) {
-              exitCompleter.complete();
+            // Ctrl+C
+            if (!_exitCompleter!.isCompleted) {
+              _exitCompleter!.complete();
             }
             return;
           }
@@ -433,7 +607,7 @@ class TerminalApp {
               final RegExp regex = RegExp(r'\x1b\[<(\d+);(\d+);(\d+)([Mm])');
               final match = regex.firstMatch(s);
               if (match != null) {
-                final b = int.parse(match.group(1)!);
+                // final b = int.parse(match.group(1)!);
                 final x = int.parse(match.group(2)!);
                 final y = int.parse(match.group(3)!);
                 final type = match.group(4)!;
@@ -454,14 +628,18 @@ class TerminalApp {
             }
           }
 
+          // Focus System Dispatch
+          final keyEvent = KeyDownEvent(input);
+          FocusManager.instance.handleKey(keyEvent);
+
           _inputController.add(input);
           draw();
         },
         onError: (e) {
-          if (!exitCompleter.isCompleted) exitCompleter.complete();
+          if (!_exitCompleter!.isCompleted) _exitCompleter!.complete();
         },
         onDone: () {
-          if (!exitCompleter.isCompleted) exitCompleter.complete();
+          if (!_exitCompleter!.isCompleted) _exitCompleter!.complete();
         },
       );
 
@@ -486,7 +664,7 @@ class TerminalApp {
       draw();
 
       // Wait for exit
-      await exitCompleter.future;
+      await _exitCompleter!.future;
 
       await inputSub?.cancel();
       await signalSub?.cancel();

@@ -8,7 +8,7 @@ class Text extends RenderObjectWidget {
   final String? styleFg;
   final String? styleBg;
 
-  const Text(this.text, {this.styleFg, this.styleBg});
+  const Text(this.text, {super.key, this.styleFg, this.styleBg});
 
   @override
   Element createElement() => LeafRenderObjectElement(this);

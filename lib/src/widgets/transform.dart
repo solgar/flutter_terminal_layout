@@ -7,10 +7,14 @@ import '../rendering/geometry.dart';
 class Transform extends SingleChildRenderObjectWidget {
   final Offset transform;
 
-  const Transform({super.child, required this.transform});
+  const Transform({super.key, super.child, required this.transform});
 
-  factory Transform.translate({required Offset offset, Widget? child}) {
-    return Transform(transform: offset, child: child);
+  factory Transform.translate({
+    Key? key,
+    required Offset offset,
+    Widget? child,
+  }) {
+    return Transform(key: key, transform: offset, child: child);
   }
 
   @override

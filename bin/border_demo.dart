@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_terminal_layout/flutter_terminal_layout.dart';
 
 class BorderDemo extends StatelessWidget {
+  const BorderDemo({super.key});
   @override
   Widget build(BuildContext context) {
     final width = stdout.hasTerminal ? stdout.terminalColumns : 80;

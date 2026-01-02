@@ -14,6 +14,7 @@ class Container extends SingleChildRenderObjectWidget {
   final EdgeInsets? padding;
 
   const Container({
+    super.key,
     super.child,
     this.color,
     this.decoration,

@@ -45,7 +45,12 @@ class Viewport extends SingleChildRenderObjectWidget {
   final double offset;
   final void Function(double)? onLayoutChanged;
 
-  const Viewport({super.child, this.offset = 0.0, this.onLayoutChanged});
+  const Viewport({
+    super.key,
+    super.child,
+    this.offset = 0.0,
+    this.onLayoutChanged,
+  });
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -70,11 +75,12 @@ class ListView extends StatefulWidget {
   final IndexedWidgetBuilder? itemBuilder;
   final int? itemCount;
 
-  const ListView({required this.children, this.controller})
+  const ListView({super.key, required this.children, this.controller})
     : itemBuilder = null,
       itemCount = null;
 
   const ListView.builder({
+    super.key,
     required this.itemBuilder,
     this.itemCount,
     this.controller,
