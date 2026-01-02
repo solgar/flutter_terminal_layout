@@ -2,6 +2,8 @@ import '../rendering/render_object.dart';
 import '../rendering/geometry.dart';
 import '../rendering/canvas.dart';
 import '../rendering/constraints.dart';
+export '../rendering/decoration.dart';
+export '../rendering/geometry.dart';
 import '../rendering/proxy.dart';
 import '../core/events.dart';
 import '../core/terminal.dart';

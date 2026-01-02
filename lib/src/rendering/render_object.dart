@@ -24,9 +24,23 @@ abstract class RenderObject {
 
   BoxConstraints get constraints => _constraints ?? BoxConstraints();
 
+  bool _needsLayout = true;
+  bool get needsLayout => _needsLayout;
+
+  void markNeedsLayout() {
+    if (_needsLayout) {
+      return;
+    }
+    _needsLayout = true;
+    if (_parent != null) {
+      _parent!.markNeedsLayout();
+    }
+  }
+
   /// Lays out the render object.
   void layout(BoxConstraints constraints, {bool parentUsesSize = false}) {
     _constraints = constraints;
+    _needsLayout = false;
     performLayout();
   }
 

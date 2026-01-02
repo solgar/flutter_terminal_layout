@@ -2,6 +2,21 @@ import 'dart:io';
 
 /// Manages the terminal state.
 class Terminal {
+  static Terminal? _instance;
+  static Terminal get instance {
+    if (_instance == null) {
+      throw StateError('Terminal is not initialized. Call Terminal() first.');
+    }
+    return _instance!;
+  }
+
+  Terminal() {
+    if (_instance != null) {
+      throw StateError('Terminal is already initialized.');
+    }
+    _instance = this;
+  }
+
   bool _isRaw = false;
 
   Stream<List<int>> get input => stdin;

@@ -76,7 +76,7 @@ class RenderFlex extends RenderObject {
 
         if (direction == FlexDirection.horizontal) {
           innerConstraints = BoxConstraints(
-            maxWidth: constraints.maxWidth,
+            maxWidth: 100000, // Unbounded main axis for non-flex children
             minHeight: minCross,
             maxHeight: maxCross,
           );
@@ -84,7 +84,7 @@ class RenderFlex extends RenderObject {
           innerConstraints = BoxConstraints(
             minWidth: minCross,
             maxWidth: maxCross,
-            maxHeight: constraints.maxHeight,
+            maxHeight: 100000, // Unbounded main axis for non-flex children
           );
         }
 

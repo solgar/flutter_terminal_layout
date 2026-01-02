@@ -107,3 +107,48 @@ class Rect {
   @override
   String toString() => 'Rect($left, $top, $right, $bottom)';
 }
+
+/// Immutable offsets for the 4 cardinal directions.
+class EdgeInsets {
+  final int left;
+  final int top;
+  final int right;
+  final int bottom;
+
+  const EdgeInsets.only({
+    this.left = 0,
+    this.top = 0,
+    this.right = 0,
+    this.bottom = 0,
+  });
+
+  const EdgeInsets.all(int value)
+    : left = value,
+      top = value,
+      right = value,
+      bottom = value;
+
+  const EdgeInsets.symmetric({int vertical = 0, int horizontal = 0})
+    : left = horizontal,
+      top = vertical,
+      right = horizontal,
+      bottom = vertical;
+
+  static const EdgeInsets zero = EdgeInsets.only();
+
+  /// Returns a new EdgeInsets with values added to existing ones
+  EdgeInsets add(EdgeInsets other) {
+    return EdgeInsets.only(
+      left: left + other.left,
+      top: top + other.top,
+      right: right + other.right,
+      bottom: bottom + other.bottom,
+    );
+  }
+
+  /// Inflates a rect by the amounts in this EdgeInsets.
+  // Rect inflateRect(Rect rect) { ... }
+
+  /// Deflates a rect...
+  // Rect deflateRect(Rect rect) { ... }
+}

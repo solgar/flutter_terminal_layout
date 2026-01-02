@@ -32,6 +32,17 @@ class Ansi {
   static const String blue = '$esc[34m';
   static const String magenta = '$esc[35m';
   static const String cyan = '$esc[36m';
+  // static const String white = '$esc[37m'; // Already defined above
+
+  // Bright/Bold Colors
+  static const String brightBlack = '$esc[90m'; // Dark Grey
+  static const String brightRed = '$esc[91m';
+  static const String brightGreen = '$esc[92m';
+  static const String brightYellow = '$esc[93m';
+  static const String brightBlue = '$esc[94m';
+  static const String brightMagenta = '$esc[95m';
+  static const String brightCyan = '$esc[96m';
+  static const String brightWhite = '$esc[97m';
 
   // Colors - Background
   static const String bgWhite = '$esc[47m';
@@ -52,4 +63,8 @@ class Ansi {
     if (fg != null || bg != null) buffer.write(reset);
     return buffer.toString();
   }
+
+  // TrueColor (RGB)
+  static String rgb(int r, int g, int b) => '$esc[38;2;$r;$g;${b}m';
+  static String bgRgb(int r, int g, int b) => '$esc[48;2;$r;$g;${b}m';
 }

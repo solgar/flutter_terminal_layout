@@ -44,6 +44,15 @@ class BoxConstraints {
     );
   }
 
+  BoxConstraints deflate({int horizontal = 0, int vertical = 0}) {
+    return BoxConstraints(
+      minWidth: math.max(0, minWidth - horizontal),
+      maxWidth: math.max(0, maxWidth - horizontal),
+      minHeight: math.max(0, minHeight - vertical),
+      maxHeight: math.max(0, maxHeight - vertical),
+    );
+  }
+
   @override
   String toString() =>
       'BoxConstraints($minWidth<=$maxWidth, $minHeight<=$maxHeight)';
