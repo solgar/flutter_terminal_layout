@@ -85,6 +85,8 @@ class Canvas {
     '╬': 15,
   };
 
+  static Map<int, String> get maskToChar => _maskToChar;
+
   static const Map<int, String> _maskToChar = {
     5: '│', 10: '─',
     6: '┌', 12: '┐', 3: '└', 9: '┘',

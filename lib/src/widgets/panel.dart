@@ -37,16 +37,39 @@ class Panel extends StatelessWidget {
       return Column(
         children: [
           Row(
+            spacing: 0,
             children: [
-              Text('┌─', styleFg: bColor),
+              // Top Left Corner (border-aware)
+              Container(
+                width: 1,
+                height: 1,
+                decoration: BoxDecoration(
+                  border: BoxBorder(top: border, left: border),
+                ),
+              ),
+              // Dash after corner (border-aware)
+              Container(
+                width: 1,
+                height: 1,
+                decoration: BoxDecoration(border: BoxBorder(top: border)),
+              ),
+              // Title
               Text(' $title ', styleFg: titleColor ?? Ansi.white),
+              // Filler Line
               Expanded(
                 child: Container(
                   height: 1,
                   decoration: BoxDecoration(border: BoxBorder(top: border)),
                 ),
               ),
-              Text('┐', styleFg: bColor),
+              // Top Right Corner (border-aware)
+              Container(
+                width: 1,
+                height: 1,
+                decoration: BoxDecoration(
+                  border: BoxBorder(top: border, right: border),
+                ),
+              ),
             ],
           ),
           Expanded(

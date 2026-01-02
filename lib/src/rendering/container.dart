@@ -178,16 +178,51 @@ class RenderContainer extends RenderObject {
   }
 
   void _paintBorder(Canvas canvas, Offset offset, BoxBorder border) {
-    final int left = offset.dx;
-    final int top = offset.dy;
-    final int right = left + size.width - 1;
-    final int bottom = top + size.height - 1;
-
-    // Helper to check side existence
+    // Helper to check side existence (Scoped for entire function)
     final bool hasTop = border.top.style != BorderStyle.none;
     final bool hasBottom = border.bottom.style != BorderStyle.none;
     final bool hasLeft = border.left.style != BorderStyle.none;
     final bool hasRight = border.right.style != BorderStyle.none;
+
+    if (size.width == 1 && size.height == 1) {
+      // Special 1x1 handling to resolve corner conflicts
+      int mask = 0;
+      // N=1, E=2, S=4, W=8
+      // Horizontal implies E+W (10)
+      if (hasTop) mask |= 10;
+      if (hasBottom) mask |= 10;
+      // Vertical implies N+S (5)
+      if (hasLeft) mask |= 5;
+      if (hasRight) mask |= 5;
+
+      // Subtract extensions based on corners
+      // Top-Left intersection: Remove West (8) and North (1)
+      if (hasTop && hasLeft) mask &= ~9;
+      // Top-Right intersection: Remove East (2) and North (1)
+      if (hasTop && hasRight) mask &= ~3;
+      // Bottom-Left intersection: Remove West (8) and South (4)
+      if (hasBottom && hasLeft) mask &= ~12;
+      // Bottom-Right intersection: Remove East (2) and South (4)
+      if (hasBottom && hasRight) mask &= ~6;
+
+      if (mask != 0) {
+        // Use generic '+' if maskToChar fails (shouldn't happen for valid masks)
+        String char = Canvas.maskToChar[mask] ?? '+';
+        // Pick color (priority: top, left, bottom, right)
+        String? color =
+            border.top.color ??
+            border.left.color ??
+            border.bottom.color ??
+            border.right.color;
+        canvas.setCell(offset.dx, offset.dy, char, fg: color, isBorder: true);
+      }
+      return;
+    }
+
+    final int left = offset.dx;
+    final int top = offset.dy;
+    final int right = left + size.width - 1;
+    final int bottom = top + size.height - 1;
 
     // Top Edge (excluding corners)
     if (hasTop) {

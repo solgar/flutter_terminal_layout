@@ -57,13 +57,7 @@ class ClaudeCodeApp extends StatelessWidget {
                   flex: 4,
                   borderColor: accentColorStr,
                   borderStyle: BorderStyle.solid,
-                  // Add padding inside the panel content? Panel handles padding default 1.
-                  padding: EdgeInsets.only(
-                    left: 2,
-                    right: 1,
-                    top: 1,
-                    bottom: 1,
-                  ),
+                  padding: EdgeInsets.all(1),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
