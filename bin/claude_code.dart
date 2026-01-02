@@ -6,197 +6,151 @@ void main() {
 
 class ClaudeCodeApp extends StatelessWidget {
   const ClaudeCodeApp({super.key});
+
   @override
   Widget build(BuildContext context) {
+    final bgColor = Ansi.bgRgb(20, 20, 20);
+    // Peach/Red accent color (True Color)
+    final accentColorStr = Ansi.rgb(240, 95, 87);
+
     return Container(
-      decoration: BoxDecoration(color: Ansi.bgRgb(20, 20, 20)),
+      decoration: BoxDecoration(color: bgColor),
+      padding: EdgeInsets.symmetric(horizontal: 1),
       child: Column(
         children: [
+          Container(height: 1), // Top margin
+          // MAIN CONTENT SPLIT (Using HPanel with titled Panels)
           Expanded(
-            child: VPanel(
+            child: HPanel(
               children: [
-                // 1. Header
+                // LEFT PANEL
                 Panel(
-                  height: 3,
-                  borderColor: Ansi.brightRed,
-                  borderStyle: BorderStyle.dashed,
-                  child: Container(
-                    alignment: Alignment.center,
-                    child: Row(children: [Spacer(), ClaudeHeader(), Spacer()]),
+                  flex: 6,
+                  title: 'Claude Code v2.0.23',
+                  titleColor: Ansi.white,
+                  borderColor: accentColorStr,
+                  borderStyle: BorderStyle.solid,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Spacer(),
+                      Text('Welcome back Teresa!', styleFg: Ansi.brightWhite),
+                      Container(height: 1),
+
+                      // LOGO
+                      const PixelArtLogo(),
+
+                      Container(height: 1),
+                      // User Info
+                      Text('Sonnet 4.5 • Claude Max', styleFg: Ansi.grey),
+                      Text(
+                        '/Users/ttorres/Documents/Competitive Analysis',
+                        styleFg: Ansi.grey,
+                      ),
+                      Spacer(),
+                    ],
                   ),
                 ),
 
-                // 2. Main Content
-                HPanel(
-                  flex: 1,
-                  children: [
-                    // Left Column
-                    Panel(
-                      flex: 1,
-                      borderColor: Ansi.brightRed,
-                      borderStyle: BorderStyle.dashed,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                // RIGHT PANEL
+                Panel(
+                  flex: 4,
+                  borderColor: accentColorStr,
+                  borderStyle: BorderStyle.solid,
+                  // Add padding inside the panel content? Panel handles padding default 1.
+                  padding: EdgeInsets.only(
+                    left: 2,
+                    right: 1,
+                    top: 1,
+                    bottom: 1,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Tips Header (Content)
+                      Text('Tips for getting started', styleFg: accentColorStr),
+                      Container(height: 1),
+                      // Tips content
+                      Text('Run /init to create a C...', styleFg: Ansi.white),
+                      Container(height: 1),
+
+                      // "Tray" Separator Line [ └──────┘ ]
+                      // Keeping this custom row as it's content-level styling
+                      Row(
                         children: [
-                          Spacer(),
-                          Text(
-                            'Welcome back Meaghan!',
-                            styleFg: Ansi.brightWhite,
+                          Text('└', styleFg: Ansi.brightBlack),
+                          Expanded(
+                            child: Container(
+                              height: 1,
+                              decoration: BoxDecoration(
+                                border: BoxBorder(
+                                  bottom: BorderSide(color: Ansi.brightBlack),
+                                ),
+                              ),
+                            ),
                           ),
-                          Container(height: 1),
-                          PixelArtLogo(),
-                          Container(height: 1),
-                          Text(
-                            'Sonnet 3.5 • Max 20x',
-                            styleFg: Ansi.brightBlack,
-                          ),
-                          Text('/users/m/code/apps', styleFg: Ansi.brightBlack),
-                          Spacer(),
+                          Text('┘', styleFg: Ansi.brightBlack),
                         ],
                       ),
-                    ),
 
-                    // Right Column
-                    VPanel(
-                      flex: 1,
-                      children: [
-                        // Recent Activity
-                        Panel(
-                          flex: 1,
-                          borderColor: Ansi.brightRed,
-                          borderStyle: BorderStyle.dashed,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Recent activity', styleFg: Ansi.brightRed),
-                              _buildRecentActivityRow(
-                                '1m ago',
-                                'Updated project memory',
-                              ),
-                              _buildRecentActivityRow(
-                                '8m ago',
-                                'Updated claw\'d feet',
-                              ),
-                              _buildRecentActivityRow(
-                                '2d ago',
-                                'Add words to spinner',
-                              ),
-                              Text(
-                                '... /resume for more',
-                                styleFg: Ansi.brightBlack,
-                              ),
-                            ],
-                          ),
-                        ),
+                      Container(height: 2),
 
-                        // What's New
-                        Panel(
-                          flex: 1,
-                          borderColor: Ansi.brightRed,
-                          borderStyle: BorderStyle.dashed,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('What\'s new', styleFg: Ansi.brightRed),
-                              Text(
-                                '/agents to create subagents',
-                                styleFg: Ansi.brightWhite,
-                              ),
-                              Text(
-                                '/security-review for review',
-                                styleFg: Ansi.brightWhite,
-                              ),
-                              Text(
-                                'ctrl+b to bg bashes',
-                                styleFg: Ansi.brightWhite,
-                              ),
-                              Text(
-                                '... /help for more',
-                                styleFg: Ansi.brightBlack,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                      // Recent Activity
+                      Text('Recent activity', styleFg: accentColorStr),
+                      Text('No recent activity', styleFg: Ansi.grey),
+                      Spacer(),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
 
-          // 3. Input
+          // INPUT AREA (Outside Panel)
+          Container(height: 1),
           Container(
-            padding: EdgeInsets.all(1),
+            height: 3, // Fixed height for input
             decoration: BoxDecoration(
               border: BoxBorder.all(
                 color: Ansi.brightBlack,
                 style: BorderStyle.solid,
               ),
             ),
+            padding: EdgeInsets.all(1),
             child: TextField(
               decorationPrefix: '> ',
-              placeholder: 'Try "edit < filepath> to ..."',
+              placeholder: 'Try "how does <filepath> work?"',
             ),
           ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 1),
+            child: Row(
+              children: [
+                Text('? for shortcuts', styleFg: Ansi.grey),
+                Spacer(),
+                Text('Thinking off (tab to toggle)', styleFg: Ansi.grey),
+              ],
+            ),
+          ),
+          Container(height: 1),
         ],
       ),
     );
   }
 }
 
-class RecentActivityRow extends StatelessWidget {
-  final String time;
-  final String desc;
-  const RecentActivityRow(this.time, this.desc, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(width: 8, child: Text(time, styleFg: Ansi.brightWhite)),
-        Text(desc, styleFg: Ansi.brightWhite),
-      ],
-    );
-  }
-}
-
-// Helper for Recent Activity
-Widget _buildRecentActivityRow(String time, String action) {
-  // Simple Row
-  return Row(
-    children: [
-      Container(width: 10, child: Text(time, styleFg: Ansi.brightWhite)),
-      Text(action, styleFg: Ansi.brightWhite),
-    ],
-  );
-}
-
-class ClaudeHeader extends StatelessWidget {
-  const ClaudeHeader({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(width: 1), // Margin
-        Text('Claude Code v2.0.0', styleFg: Ansi.brightBlack),
-      ],
-    );
-  }
-}
-
 class PixelArtLogo extends StatelessWidget {
   const PixelArtLogo({super.key});
+
   @override
   Widget build(BuildContext context) {
-    final color = Ansi.brightRed; // Brighter Orange/Red
+    // The "Box with eyes" logo
+    final color = Ansi.rgb(240, 95, 87);
     return Column(
       children: [
-        Text('     ██████     ', styleFg: color),
-        Text('    ██    ██    ', styleFg: color),
-        Text('  ████    ████  ', styleFg: color),
-        Text('    ████████    ', styleFg: color),
-        Text('    █  █   █    ', styleFg: color),
+        Text('  ▄▄▄▄▄▄▄  ', styleFg: color),
+        Text('  █ ▀ ▀ █  ', styleFg: color), // Eyes
+        Text('  █ ▄▄▄ █  ', styleFg: color), // Mouth/Bottom
       ],
     );
   }

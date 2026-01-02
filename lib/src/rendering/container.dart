@@ -183,16 +183,22 @@ class RenderContainer extends RenderObject {
     final int right = left + size.width - 1;
     final int bottom = top + size.height - 1;
 
-    // Top
-    if (border.top.style != BorderStyle.none) {
+    // Helper to check side existence
+    final bool hasTop = border.top.style != BorderStyle.none;
+    final bool hasBottom = border.bottom.style != BorderStyle.none;
+    final bool hasLeft = border.left.style != BorderStyle.none;
+    final bool hasRight = border.right.style != BorderStyle.none;
+
+    // Top Edge (excluding corners)
+    if (hasTop) {
       final char = _horizontalChar(border.top.style);
       for (int x = left + 1; x < right; x++) {
         canvas.setCell(x, top, char, fg: border.top.color, isBorder: true);
       }
     }
 
-    // Bottom
-    if (border.bottom.style != BorderStyle.none) {
+    // Bottom Edge (excluding corners)
+    if (hasBottom) {
       final char = _horizontalChar(border.bottom.style);
       for (int x = left + 1; x < right; x++) {
         canvas.setCell(
@@ -205,66 +211,92 @@ class RenderContainer extends RenderObject {
       }
     }
 
-    // Left
-    if (border.left.style != BorderStyle.none) {
+    // Left Edge (excluding corners)
+    if (hasLeft) {
       final char = _verticalChar(border.left.style);
       for (int y = top + 1; y < bottom; y++) {
         canvas.setCell(left, y, char, fg: border.left.color, isBorder: true);
       }
     }
 
-    // Right
-    if (border.right.style != BorderStyle.none) {
+    // Right Edge (excluding corners)
+    if (hasRight) {
       final char = _verticalChar(border.right.style);
       for (int y = top + 1; y < bottom; y++) {
         canvas.setCell(right, y, char, fg: border.right.color, isBorder: true);
       }
     }
 
-    // Corners - Also isBorder!
+    // CORNERS
+    // Logic: If both sides meet, use corner char.
+    // If only one side touches the corner, extend that side's char.
+
     // Top Left
-    if (border.top.style != BorderStyle.none ||
-        border.left.style != BorderStyle.none) {
-      canvas.setCell(
-        left,
-        top,
-        _topLeftChar(border.top.style), // Or whichever style dominates
-        fg: border.top.color ?? border.left.color,
-        isBorder: true,
-      );
+    if (hasTop || hasLeft) {
+      String char;
+      String? color;
+      if (hasTop && hasLeft) {
+        char = _topLeftChar(border.top.style);
+        color = border.top.color ?? border.left.color;
+      } else if (hasTop) {
+        char = _horizontalChar(border.top.style);
+        color = border.top.color;
+      } else {
+        char = _verticalChar(border.left.style);
+        color = border.left.color;
+      }
+      canvas.setCell(left, top, char, fg: color, isBorder: true);
     }
+
     // Top Right
-    if (border.top.style != BorderStyle.none ||
-        border.right.style != BorderStyle.none) {
-      canvas.setCell(
-        right,
-        top,
-        _topRightChar(border.top.style),
-        fg: border.top.color ?? border.right.color,
-        isBorder: true,
-      );
+    if (hasTop || hasRight) {
+      String char;
+      String? color;
+      if (hasTop && hasRight) {
+        char = _topRightChar(border.top.style);
+        color = border.top.color ?? border.right.color;
+      } else if (hasTop) {
+        char = _horizontalChar(border.top.style);
+        color = border.top.color;
+      } else {
+        char = _verticalChar(border.right.style);
+        color = border.right.color;
+      }
+      canvas.setCell(right, top, char, fg: color, isBorder: true);
     }
+
     // Bottom Left
-    if (border.bottom.style != BorderStyle.none ||
-        border.left.style != BorderStyle.none) {
-      canvas.setCell(
-        left,
-        bottom,
-        _bottomLeftChar(border.bottom.style),
-        fg: border.bottom.color ?? border.left.color,
-        isBorder: true,
-      );
+    if (hasBottom || hasLeft) {
+      String char;
+      String? color;
+      if (hasBottom && hasLeft) {
+        char = _bottomLeftChar(border.bottom.style);
+        color = border.bottom.color ?? border.left.color;
+      } else if (hasBottom) {
+        char = _horizontalChar(border.bottom.style);
+        color = border.bottom.color;
+      } else {
+        char = _verticalChar(border.left.style);
+        color = border.left.color;
+      }
+      canvas.setCell(left, bottom, char, fg: color, isBorder: true);
     }
+
     // Bottom Right
-    if (border.bottom.style != BorderStyle.none ||
-        border.right.style != BorderStyle.none) {
-      canvas.setCell(
-        right,
-        bottom,
-        _bottomRightChar(border.bottom.style),
-        fg: border.bottom.color ?? border.right.color,
-        isBorder: true,
-      );
+    if (hasBottom || hasRight) {
+      String char;
+      String? color;
+      if (hasBottom && hasRight) {
+        char = _bottomRightChar(border.bottom.style);
+        color = border.bottom.color ?? border.right.color;
+      } else if (hasBottom) {
+        char = _horizontalChar(border.bottom.style);
+        color = border.bottom.color;
+      } else {
+        char = _verticalChar(border.right.style);
+        color = border.right.color;
+      }
+      canvas.setCell(right, bottom, char, fg: color, isBorder: true);
     }
   }
 

@@ -11,6 +11,8 @@ class Panel extends StatelessWidget {
   final BorderStyle borderStyle;
   final String? color;
   final EdgeInsets? padding;
+  final String? title;
+  final String? titleColor;
 
   const Panel({
     super.key,
@@ -18,14 +20,51 @@ class Panel extends StatelessWidget {
     this.flex = 0,
     this.width,
     this.height,
-    this.borderColor, // Default usually white, but nullable string
+    this.borderColor,
     this.borderStyle = BorderStyle.solid,
     this.color,
     this.padding,
+    this.title,
+    this.titleColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (title != null) {
+      final bColor = borderColor ?? Ansi.white;
+      final border = BorderSide(color: bColor, style: borderStyle);
+      // Construct Header Row + Body
+      return Column(
+        children: [
+          Row(
+            children: [
+              Text('┌─', styleFg: bColor),
+              Text(' $title ', styleFg: titleColor ?? Ansi.white),
+              Expanded(
+                child: Container(
+                  height: 1,
+                  decoration: BoxDecoration(border: BoxBorder(top: border)),
+                ),
+              ),
+              Text('┐', styleFg: bColor),
+            ],
+          ),
+          Expanded(
+            child: Container(
+              width: width?.toInt(),
+              // height is handled by Column/Expanded
+              decoration: BoxDecoration(
+                color: color ?? Ansi.bgRgb(20, 20, 20),
+                border: BoxBorder(left: border, right: border, bottom: border),
+              ),
+              padding: padding ?? EdgeInsets.all(1),
+              child: child,
+            ),
+          ),
+        ],
+      );
+    }
+
     return Container(
       width: width?.toInt(),
       height: height?.toInt(),
