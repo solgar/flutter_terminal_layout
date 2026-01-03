@@ -41,50 +41,39 @@ class _LoadingDemoState extends State<LoadingDemo> {
     super.dispose();
   }
 
-  void _handleInput(List<int> bytes) {
-    if (bytes.isNotEmpty && bytes[0] == 113) {
-      // 'q'
-      TerminalApp.instance.stop();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return KeyboardListener(
-      onKeyEvent: _handleInput,
+    return Container(
+      color: Ansi.bgBlack,
+      alignment: Alignment.center,
       child: Container(
-        color: Ansi.bgBlack,
-        alignment: Alignment.center,
-        child: Container(
-          width: 50,
-          height: 20,
-          padding: EdgeInsets.all(1),
-          decoration: BoxDecoration(
-            border: BoxBorder.all(color: Ansi.blue, style: BorderStyle.rounded),
-          ),
-          child: Column(
-            children: [
-              Container(height: 1),
-              Text('Loading Indicators Demo', styleFg: Ansi.brightWhite),
-              Container(height: 2),
+        width: 50,
+        height: 20,
+        padding: EdgeInsets.all(1),
+        decoration: BoxDecoration(
+          border: BoxBorder.all(color: Ansi.blue, style: BorderStyle.rounded),
+        ),
+        child: Column(
+          children: [
+            Container(height: 1),
+            Text('Loading Indicators Demo', styleFg: Ansi.brightWhite),
+            Container(height: 2),
 
-              Text('Spinner:', styleFg: Ansi.grey),
-              Container(height: 1),
-              const Spinner(),
+            Text('Spinner:', styleFg: Ansi.grey),
+            Container(height: 1),
+            const Spinner(),
 
-              Container(height: 2),
+            Container(height: 2),
 
-              Text('Progress Bar:', styleFg: Ansi.grey),
-              Container(height: 1),
-              ProgressBar(progress: _progress),
-              Container(height: 1),
-              Text('${(_progress * 100).toInt()}%', styleFg: Ansi.green),
+            Text('Progress Bar:', styleFg: Ansi.grey),
+            Container(height: 1),
+            ProgressBar(progress: _progress),
+            Container(height: 1),
+            Text('${(_progress * 100).toInt()}%', styleFg: Ansi.green),
 
-              Spacer(),
-              Text('Press q to quit', styleFg: Ansi.darkGray),
-              Container(height: 1),
-            ],
-          ),
+            Spacer(),
+            Container(height: 1),
+          ],
         ),
       ),
     );
