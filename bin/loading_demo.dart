@@ -26,7 +26,7 @@ class _LoadingDemoState extends State<LoadingDemo> {
     _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       if (mounted) {
         setState(() {
-          _progress += 0.02;
+          _progress += 0.003;
           if (_progress > 1.0) {
             _progress = 0.0;
           }
@@ -58,6 +58,7 @@ class _LoadingDemoState extends State<LoadingDemo> {
         child: Container(
           width: 50,
           height: 20,
+          padding: EdgeInsets.all(1),
           decoration: BoxDecoration(
             border: BoxBorder.all(color: Ansi.blue, style: BorderStyle.rounded),
           ),

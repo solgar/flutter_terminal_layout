@@ -510,6 +510,7 @@ class TerminalApp {
   // Subscriptions
   StreamSubscription? inputSub;
   StreamSubscription? signalSub;
+  StreamSubscription? resizeSub;
 
   Future<void> run(Widget app) async {
     _exitCompleter = Completer<void>();
@@ -560,6 +561,7 @@ class TerminalApp {
 
         final rootRenderObject = element.renderObject;
         if (rootRenderObject != null) {
+          // Re-query terminal size
           final width = _terminal.width;
           final height = _terminal.height;
 
@@ -577,6 +579,15 @@ class TerminalApp {
         restoreTerminal();
         exit(0);
       });
+
+      // Handle Resize (SIGWINCH)
+      try {
+        resizeSub = ProcessSignal.sigwinch.watch().listen((_) {
+          draw();
+        });
+      } catch (_) {
+        // Platform might not support sigwinch
+      }
 
       void dispatchPointerEvent(PointerEvent event) {
         final root = element.renderObject;
@@ -688,6 +699,10 @@ class TerminalApp {
 
       try {
         await signalSub?.cancel();
+      } catch (_) {}
+
+      try {
+        await resizeSub?.cancel();
       } catch (_) {}
     }
   }
