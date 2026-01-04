@@ -48,7 +48,38 @@ class _TextFieldState extends State<TextField> {
 
   void _handleKeyEvent(List<int> chars) {
     setState(() {
-      for (final char in chars) {
+      int i = 0;
+      while (i < chars.length) {
+        final char = chars[i];
+
+        if (char == 27) {
+          // ANSI Sequence?
+          if (i + 2 < chars.length && chars[i + 1] == 91) {
+            final code = chars[i + 2];
+            if (code == 65) { // Up
+              _moveVertical(-1);
+              i += 3;
+              continue;
+            } else if (code == 66) { // Down
+              _moveVertical(1);
+              i += 3;
+              continue;
+            } else if (code == 67) { // Right
+              if (_controller.selectionIndex < _controller.text.length) {
+                _controller.selectionIndex++;
+              }
+              i += 3;
+              continue;
+            } else if (code == 68) { // Left
+              if (_controller.selectionIndex > 0) {
+                _controller.selectionIndex--;
+              }
+              i += 3;
+              continue;
+            }
+          }
+        }
+
         if (char == 127) {
           // Backspace
           if (_controller.text.isNotEmpty && _controller.selectionIndex > 0) {
@@ -70,8 +101,47 @@ class _TextFieldState extends State<TextField> {
           _controller.text = newText;
           _controller.selectionIndex++;
         }
+        i++;
       }
     });
+  }
+
+  void _moveVertical(int dir) {
+    final element = context as Element;
+    if (element.renderObject == null) return;
+    int width = element.renderObject!.size.width.toInt();
+    if (width <= 0) return;
+
+    final prefixLen = widget.decorationPrefix?.length ?? 0;
+    final totalLen = prefixLen + _controller.text.length;
+    final currentVisualIndex = prefixLen + _controller.selectionIndex;
+
+    // Calculate current visual (row, col)
+    final row = currentVisualIndex ~/ width;
+    final col = currentVisualIndex % width;
+
+    // Target row
+    final targetRow = row + dir;
+    if (targetRow < 0) {
+      // Move to start
+      _controller.selectionIndex = 0;
+      return;
+    }
+
+    int targetVisualIndex = targetRow * width + col;
+    
+    // Clamp to valid range relative to text
+    // We want the cursor to stay on the text part.
+    // Minimum visual index is prefixLen (start of text).
+    // Maximum visual index is prefixLen + text.length.
+
+    if (targetVisualIndex < prefixLen) {
+      targetVisualIndex = prefixLen;
+    } else if (targetVisualIndex > prefixLen + _controller.text.length) {
+      targetVisualIndex = prefixLen + _controller.text.length;
+    }
+
+    _controller.selectionIndex = targetVisualIndex - prefixLen;
   }
 
   @override
