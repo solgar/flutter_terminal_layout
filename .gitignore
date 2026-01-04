@@ -4,3 +4,4 @@
 build/
 *.exe
 *.log
+dart_devtools_*

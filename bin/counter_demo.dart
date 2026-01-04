@@ -37,9 +37,24 @@ class _CounterAppState extends State<CounterApp> {
           bottom: 0,
           left: 0,
           child: Text(
-            ' ESC to go back, space to increment',
+            'ESC to go back, space to increment',
             color: Colors.white,
           ),
+        ),
+        Positioned(
+          top: 0,
+          left: 0,
+          child: Text('Top left', color: Colors.white),
+        ),
+        Positioned(
+          top: 0,
+          right: 0,
+          child: Text('Top right', color: Colors.white),
+        ),
+        Positioned(
+          bottom: 0,
+          right: 0,
+          child: Text('Bottom right', color: Colors.white),
         ),
       ],
     );

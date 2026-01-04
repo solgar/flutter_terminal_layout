@@ -35,6 +35,8 @@ class BoxConstraints {
 
   bool get isTight => minWidth >= maxWidth && minHeight >= maxHeight;
 
+  Size get smallest => Size(minWidth, minHeight);
+
   BoxConstraints loosen() {
     return BoxConstraints(
       minWidth: 0,
