@@ -103,7 +103,6 @@ class ClaudeCodeApp extends StatelessWidget {
           // INPUT AREA (Outside Panel)
           Container(height: 1),
           Container(
-            height: 3, // Fixed height for input
             decoration: BoxDecoration(
               border: BoxBorder.all(
                 color: Colors.brightBlack,
