@@ -3,12 +3,17 @@ import 'package:flutter_terminal_layout/flutter_terminal_layout.dart';
 import 'border_demo.dart';
 import 'claude_code.dart';
 import 'counter_demo.dart';
+import 'cube_demo.dart';
 import 'focus_demo.dart';
 import 'gemini_app.dart';
 import 'layout_demo.dart';
 import 'list_demo.dart';
 import 'loading_demo.dart';
 import 'mouse_app.dart';
+
+void main() {
+  runApp(const MainDemoApp());
+}
 
 class MainDemoApp extends StatefulWidget {
   const MainDemoApp({super.key});
@@ -30,6 +35,7 @@ class _MainDemoAppState extends State<MainDemoApp> {
       MapEntry('Border Demo', () => const BorderDemo()),
       MapEntry('Claude Code', () => const ClaudeCodeApp()),
       MapEntry('Counter', () => const CounterApp()),
+      MapEntry('Cube 3D', () => const CubeApp()),
       MapEntry('Focus Demo', () => const FocusDemo()),
       MapEntry('Gemini TUI', () => const GeminiApp()),
       MapEntry('Layout Demo', () => const DemoApp()),
