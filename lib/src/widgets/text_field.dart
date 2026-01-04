@@ -21,6 +21,7 @@ class TextEditingController {
 class TextField extends StatefulWidget {
   final TextEditingController? controller;
   final ValueChanged<String>? onSubmitted;
+  final ValueChanged<String>? onChanged;
   final String? decorationPrefix; // e.g. "> "
   final String? placeholder;
 
@@ -28,6 +29,7 @@ class TextField extends StatefulWidget {
     super.key,
     this.controller,
     this.onSubmitted,
+    this.onChanged,
     this.decorationPrefix,
     this.placeholder,
   });
@@ -49,6 +51,7 @@ class _TextFieldState extends State<TextField> {
   void _handleKeyEvent(List<int> chars) {
     setState(() {
       int i = 0;
+      bool changed = false;
       while (i < chars.length) {
         final char = chars[i];
 
@@ -87,6 +90,7 @@ class _TextFieldState extends State<TextField> {
                     ) +
                     _controller.text.substring(_controller.selectionIndex + 1);
                 _controller.text = newText;
+                changed = true;
               }
               i += 4;
               continue;
@@ -102,6 +106,7 @@ class _TextFieldState extends State<TextField> {
                 _controller.text.substring(_controller.selectionIndex);
             _controller.text = newText;
             _controller.selectionIndex--;
+            changed = true;
           }
         } else if (char == 13 || char == 10) {
           // Enter
@@ -114,8 +119,12 @@ class _TextFieldState extends State<TextField> {
               _controller.text.substring(_controller.selectionIndex);
           _controller.text = newText;
           _controller.selectionIndex++;
+          changed = true;
         }
         i++;
+      }
+      if (changed) {
+        widget.onChanged?.call(_controller.text);
       }
     });
   }

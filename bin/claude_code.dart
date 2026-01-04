@@ -80,7 +80,7 @@ class _ClaudeCodeAppState extends State<ClaudeCodeApp> {
               itemCount: 1 + _messages.length + (_isLoading ? 1 : 0),
               itemBuilder: (context, index) {
                 if (index == 0) {
-                  return Dashboard(compact: _messages.isNotEmpty);
+                  return Dashboard(compact: false);
                 }
                 
                 // Adjust index for messages
@@ -144,6 +144,7 @@ class _ClaudeCodeAppState extends State<ClaudeCodeApp> {
               decorationPrefix: '> ',
               placeholder: 'Try "how does <filepath> work?"',
               onSubmitted: _handleSubmit,
+              onChanged: (_) => _scrollToBottom(),
             ),
           ),
           Container(
