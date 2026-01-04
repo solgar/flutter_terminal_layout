@@ -2,6 +2,7 @@ import 'framework.dart';
 import 'widget.dart';
 import 'keyboard_listener.dart';
 import '../core/ansi.dart';
+import '../core/keys.dart';
 import 'rich_text.dart';
 
 typedef ValueChanged<T> = void Function(T value);
@@ -55,33 +56,33 @@ class _TextFieldState extends State<TextField> {
       while (i < chars.length) {
         final char = chars[i];
 
-        if (char == 27) {
+        if (char == Keys.esc) {
           // ANSI Sequence?
-          if (i + 2 < chars.length && chars[i + 1] == 91) {
+          if (i + 2 < chars.length && chars[i + 1] == Keys.bracket) {
             final code = chars[i + 2];
-            if (code == 65) { // Up
+            if (code == Keys.arrowUp) { // Up
               _moveVertical(-1);
               i += 3;
               continue;
-            } else if (code == 66) { // Down
+            } else if (code == Keys.arrowDown) { // Down
               _moveVertical(1);
               i += 3;
               continue;
-            } else if (code == 67) { // Right
+            } else if (code == Keys.arrowRight) { // Right
               if (_controller.selectionIndex < _controller.text.length) {
                 _controller.selectionIndex++;
               }
               i += 3;
               continue;
-            } else if (code == 68) { // Left
+            } else if (code == Keys.arrowLeft) { // Left
               if (_controller.selectionIndex > 0) {
                 _controller.selectionIndex--;
               }
               i += 3;
               continue;
-            } else if (code == 51 &&
+            } else if (code == Keys.delete &&
                 i + 3 < chars.length &&
-                chars[i + 3] == 126) {
+                chars[i + 3] == Keys.tilde) {
               // Delete (ESC [ 3 ~)
               if (_controller.selectionIndex < _controller.text.length) {
                 var newText = _controller.text.substring(
@@ -94,9 +95,9 @@ class _TextFieldState extends State<TextField> {
               }
               i += 4;
               continue;
-            } else if ((code == 53 || code == 54) &&
+            } else if ((code == Keys.pageUp || code == Keys.pageDown) &&
                 i + 3 < chars.length &&
-                chars[i + 3] == 126) {
+                chars[i + 3] == Keys.tilde) {
               // Page Up (5) / Page Down (6) - Ignore
               i += 4;
               continue;
@@ -104,7 +105,7 @@ class _TextFieldState extends State<TextField> {
           }
         }
 
-        if (char == 127) {
+        if (char == Keys.backspace) {
           // Backspace
           if (_controller.text.isNotEmpty && _controller.selectionIndex > 0) {
             var newText =
@@ -114,7 +115,7 @@ class _TextFieldState extends State<TextField> {
             _controller.selectionIndex--;
             changed = true;
           }
-        } else if (char == 13 || char == 10) {
+        } else if (char == Keys.enter || char == Keys.newline) {
           // Enter
           widget.onSubmitted?.call(_controller.text);
         } else if (char >= 32 && char <= 126) {

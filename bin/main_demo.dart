@@ -42,7 +42,7 @@ class _MainDemoAppState extends State<MainDemoApp> {
   void _handleInput(List<int> bytes) {
     if (_activeDemo != null) {
       // Check for Escape to go back
-      if (bytes.length == 1 && bytes[0] == 27) {
+      if (bytes.length == 1 && bytes[0] == Keys.esc) {
         setState(() {
           _activeDemo = null;
         });
@@ -55,25 +55,25 @@ class _MainDemoAppState extends State<MainDemoApp> {
     }
 
     // Menu Navigation
-    if (bytes.length == 3 && bytes[0] == 27 && bytes[1] == 91) {
-      if (bytes[2] == 65) {
+    if (bytes.length == 3 && bytes[0] == Keys.esc && bytes[1] == Keys.bracket) {
+      if (bytes[2] == Keys.arrowUp) {
         // Up
         setState(() {
           _selectedIndex = (_selectedIndex - 1 + _demos.length) % _demos.length;
         });
-      } else if (bytes[2] == 66) {
+      } else if (bytes[2] == Keys.arrowDown) {
         // Down
         setState(() {
           _selectedIndex = (_selectedIndex + 1) % _demos.length;
         });
       }
     } else if (bytes.length == 1) {
-      if (bytes[0] == 10 || bytes[0] == 13) {
+      if (bytes[0] == Keys.newline || bytes[0] == Keys.enter) {
         // Enter
         setState(() {
           _activeDemo = _demos[_selectedIndex].value();
         });
-      } else if (bytes[0] == 113) {
+      } else if (bytes[0] == Keys.q) {
         // 'q'
         TerminalApp.instance.stop();
       }

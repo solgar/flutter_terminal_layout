@@ -11,6 +11,7 @@ import '../rendering/proxy.dart';
 import '../core/events.dart';
 import '../core/terminal.dart';
 import '../core/ansi.dart';
+import '../core/keys.dart';
 
 import 'widget.dart';
 import 'focus.dart';
@@ -606,7 +607,7 @@ class TerminalApp {
       // Handle Input
       inputSub = _terminal.input.listen(
         (input) {
-          if (input.contains(3)) {
+          if (input.contains(Keys.ctrlC)) {
             // Ctrl+C
             if (!_exitCompleter!.isCompleted) {
               _exitCompleter!.complete();
@@ -616,9 +617,9 @@ class TerminalApp {
 
           // Mouse parsing SGR: ESC [ < B ; X ; Y M (Press) or m (Release)
           if (input.length > 3 &&
-              input[0] == 27 &&
-              input[1] == 91 &&
-              input[2] == 60) {
+              input[0] == Keys.esc &&
+              input[1] == Keys.bracket &&
+              input[2] == Keys.lessThan) {
             try {
               final s = String.fromCharCodes(input);
               final RegExp regex = RegExp(r'\x1b\[<(\d+);(\d+);(\d+)([Mm])');
@@ -630,7 +631,7 @@ class TerminalApp {
                 final type = match.group(4)!;
 
                 if (type == 'M') {
-                  if (b == 64) {
+                  if (b == MouseButtons.scrollUp) {
                     // Scroll Up
                     dispatchPointerEvent(
                       PointerScrollEvent(
@@ -638,7 +639,7 @@ class TerminalApp {
                         scrollDelta: Offset(0, -1),
                       ),
                     );
-                  } else if (b == 65) {
+                  } else if (b == MouseButtons.scrollDown) {
                     // Scroll Down
                     dispatchPointerEvent(
                       PointerScrollEvent(

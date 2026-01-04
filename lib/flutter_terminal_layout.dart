@@ -8,6 +8,7 @@ export 'src/widgets/listener.dart';
 export 'src/widgets/scroll_view.dart';
 export 'src/core/events.dart';
 export 'src/core/ansi.dart';
+export 'src/core/keys.dart';
 export 'src/core/terminal.dart';
 export 'src/rendering/geometry.dart' show Alignment;
 export 'src/widgets/rich_text.dart';

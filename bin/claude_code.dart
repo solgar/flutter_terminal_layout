@@ -66,12 +66,12 @@ class _ClaudeCodeAppState extends State<ClaudeCodeApp> {
     // Page Up: ESC [ 5 ~ (27, 91, 53, 126)
     // Page Down: ESC [ 6 ~ (27, 91, 54, 126)
     
-    if (chars.length >= 4 && chars[0] == 27 && chars[1] == 91 && chars[3] == 126) {
-      if (chars[2] == 53) {
+    if (chars.length >= 4 && chars[0] == Keys.esc && chars[1] == Keys.bracket && chars[3] == Keys.tilde) {
+      if (chars[2] == Keys.pageUp) {
         // Page Up
         final newOffset = max(0.0, _scrollController.offset - 5); // Scroll up 5 lines
         _scrollController.jumpTo(newOffset);
-      } else if (chars[2] == 54) {
+      } else if (chars[2] == Keys.pageDown) {
         // Page Down
         final newOffset = min(_scrollController.maxScrollExtent, _scrollController.offset + 5);
         _scrollController.jumpTo(newOffset);
