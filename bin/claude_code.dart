@@ -111,7 +111,7 @@ class _ClaudeCodeAppState extends State<ClaudeCodeApp> {
                    final bool isUserMessage = (msgIndex % 2 == 0);
                    
                    return Container(
-                     padding: EdgeInsets.symmetric(vertical: 1),
+                     padding: EdgeInsets.only(bottom: 1),
                      child: Row(
                        crossAxisAlignment: CrossAxisAlignment.start,
                        children: [
@@ -119,14 +119,14 @@ class _ClaudeCodeAppState extends State<ClaudeCodeApp> {
                              Spacer(),
                              Container(
                                decoration: BoxDecoration(
-                                 color: Color.fromARGB(255, 60, 60, 60),
+                                 color: Color.fromARGB(255, 45, 45, 45),
                                  border: BoxBorder.all(color: Colors.grey, style: BorderStyle.rounded),
                                ),
-                               padding: EdgeInsets.symmetric(horizontal: 2, vertical: 0),
+                               padding: EdgeInsets.symmetric(horizontal: 2, vertical: 1),
                                child: Text(_messages[msgIndex], color: Colors.white),
                              ),
                          ] else ...[
-                             Text('Claude: ', color: Color.fromARGB(255, 240, 95, 87)),
+                             Text(' Claude: ', color: Color.fromARGB(255, 240, 95, 87)),
                              Expanded(child: Text(_messages[msgIndex], color: Colors.white)),
                          ],
                        ],
@@ -136,10 +136,10 @@ class _ClaudeCodeAppState extends State<ClaudeCodeApp> {
                 
                 // Loading Indicator
                 return Container(
-                   padding: EdgeInsets.symmetric(vertical: 1),
+                   padding: EdgeInsets.only(bottom: 1),
                    child: Row(
                      children: [
-                       Text('Claude: ', color: Color.fromARGB(255, 240, 95, 87)),
+                       Text(' Claude: ', color: Color.fromARGB(255, 240, 95, 87)),
                        const Spinner(),
                      ],
                    ),
