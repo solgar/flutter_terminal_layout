@@ -42,7 +42,7 @@ class _ClaudeCodeAppState extends State<ClaudeCodeApp> {
   }
 
   void _handleSubmit(String text) {
-    if (text.trim().isEmpty) return;
+    if (text.trim().isEmpty || _isLoading) return;
 
     setState(() {
       _messages.add(text);
