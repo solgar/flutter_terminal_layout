@@ -2,7 +2,6 @@ import 'framework.dart';
 import 'widget.dart';
 import '../rendering/render_object.dart';
 import '../rendering/container.dart';
-import '../rendering/geometry.dart';
 import '../core/ansi.dart';
 
 class Container extends SingleChildRenderObjectWidget {

@@ -2,7 +2,6 @@ import 'framework.dart';
 import 'widget.dart';
 import '../rendering/render_object.dart';
 import '../rendering/canvas.dart';
-import '../rendering/geometry.dart';
 import '../core/ansi.dart';
 
 /// An immutable span of text.

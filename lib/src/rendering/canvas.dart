@@ -25,7 +25,7 @@ class Canvas {
   final List<List<Cell>> _buffer;
 
   // Clipping state
-  List<Rect> _clipStack = [];
+  final List<Rect> _clipStack = [];
 
   Canvas(Size size)
     : width = size.width,

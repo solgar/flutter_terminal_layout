@@ -2,7 +2,6 @@ import 'framework.dart';
 import 'widget.dart';
 import '../rendering/render_object.dart';
 import '../rendering/canvas.dart';
-import '../rendering/geometry.dart';
 import '../rendering/constraints.dart';
 
 class OverflowBox extends SingleChildRenderObjectWidget {
@@ -71,7 +70,7 @@ class RenderOverflowBox extends RenderObject {
   }
 
   void add(RenderObject child) {
-    this.childRenderObject = child;
+    childRenderObject = child;
   }
 
   @override

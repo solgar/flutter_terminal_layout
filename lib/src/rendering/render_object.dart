@@ -9,13 +9,8 @@ class ParentData {
 abstract class RenderObject {
   BoxConstraints? _constraints;
   Size? _size;
-  RenderObject? _parent;
+  RenderObject? parent;
   ParentData? parentData;
-
-  RenderObject? get parent => _parent;
-  set parent(RenderObject? value) {
-    _parent = value;
-  }
 
   Size get size => _size ?? Size.zero;
   set size(Size value) {
@@ -32,8 +27,8 @@ abstract class RenderObject {
       return;
     }
     _needsLayout = true;
-    if (_parent != null) {
-      _parent!.markNeedsLayout();
+    if (parent != null) {
+      parent!.markNeedsLayout();
     }
   }
 

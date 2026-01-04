@@ -7,7 +7,7 @@ class Ansi {
   static const String esc = '\x1b';
 
   // Cursor
-  static String moveTo(int row, int col) => '$esc[${row};${col}H';
+  static String moveTo(int row, int col) => '$esc[$row;${col}H';
   static const String hideCursor = '$esc[?25l';
   static const String showCursor = '$esc[?25h';
   static const String home = '$esc[H';

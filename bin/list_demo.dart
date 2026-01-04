@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter_terminal_layout/flutter_terminal_layout.dart';
 import 'mouse_app.dart';
 
@@ -10,19 +9,15 @@ class ListDemoApp extends StatefulWidget {
 
 class _ListDemoAppState extends State<ListDemoApp> {
   final ScrollController _controller = ScrollController();
-  int _itemCount = 50;
-
-  @override
-  void initState() {
-    super.initState();
-  }
+  final int _itemCount = 50;
 
   void _scroll(double delta) {
     setState(() {
       double newOffset = _controller.offset + delta;
       if (newOffset < 0) newOffset = 0;
-      if (newOffset > _controller.maxScrollExtent)
+      if (newOffset > _controller.maxScrollExtent) {
         newOffset = _controller.maxScrollExtent;
+      }
       _controller.jumpTo(newOffset);
     });
   }

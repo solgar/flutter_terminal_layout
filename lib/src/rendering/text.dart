@@ -8,7 +8,7 @@ class RenderText extends RenderObject {
   Color? _color;
   Color? _backgroundColor;
 
-  List<String> _lines = [];
+  final List<String> _lines = [];
 
   RenderText(this._text, {Color? color, Color? backgroundColor})
     : _color = color,

@@ -28,7 +28,9 @@ abstract class BuildContext {
 }
 
 abstract class Element implements BuildContext {
+  @override
   Widget widget;
+  // ignore: unused_field
   Element? _parent;
   bool _dirty = true;
 
@@ -107,13 +109,14 @@ abstract class Element implements BuildContext {
       if (child == null) return null;
       current = child!;
     }
-    return (current as RenderObjectElement)._renderObject;
+    return current._renderObject;
   }
 
   @override
   T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>() {
     final ancestor = _inheritedWidgets?[T];
     if (ancestor != null) {
+      // ignore: unnecessary_cast
       return dependOnInheritedElement(ancestor) as T?;
     }
     return null;

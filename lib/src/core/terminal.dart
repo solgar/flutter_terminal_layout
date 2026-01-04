@@ -17,6 +17,7 @@ class Terminal {
     _instance = this;
   }
 
+  // ignore: unused_field
   bool _isRaw = false;
 
   Stream<List<int>> get input => stdin;

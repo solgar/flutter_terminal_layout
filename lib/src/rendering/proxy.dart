@@ -1,7 +1,6 @@
 import 'render_object.dart';
 import 'geometry.dart';
 import 'canvas.dart';
-import 'constraints.dart';
 import '../core/events.dart';
 
 class RenderPointerListener extends RenderObject {

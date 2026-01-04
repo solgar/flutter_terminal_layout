@@ -2,7 +2,6 @@ import 'framework.dart';
 import 'widget.dart';
 import '../rendering/render_object.dart';
 import '../rendering/canvas.dart';
-import '../rendering/geometry.dart';
 import '../rendering/constraints.dart';
 
 class Stack extends MultiChildRenderObjectWidget {
@@ -73,7 +72,9 @@ class RenderStack extends RenderObject {
 
   void removeAll() {
     // Detach
-    for (var c in _children) c.parent = null;
+    for (var c in _children) {
+      c.parent = null;
+    }
     _children.clear();
     markNeedsLayout();
   }

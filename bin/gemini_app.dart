@@ -18,7 +18,6 @@ class _GeminiAppState extends State<GeminiApp> {
     '  ██████  ███████ ██      ██ ██ ██   ████ ██ ',
   ];
 
-  @override
   Widget _buildLogoLine(String text) {
     // Gradient logic: Blue -> Pink
     // Start: #4285F4 (Google Blue) -> (66, 133, 244)
@@ -50,7 +49,7 @@ class _GeminiAppState extends State<GeminiApp> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // 1. Logo Section
-        ..._logoArt.map((line) => _buildLogoLine(line)).toList(),
+        ..._logoArt.map((line) => _buildLogoLine(line)),
 
         Container(height: 1), // Replacement for SizedBox
         // 2. Tips Section

@@ -2,7 +2,6 @@ import 'framework.dart';
 import 'widget.dart';
 import '../rendering/render_object.dart';
 import '../rendering/canvas.dart';
-import '../rendering/geometry.dart';
 
 class Transform extends SingleChildRenderObjectWidget {
   final Offset transform;
@@ -43,7 +42,7 @@ class RenderTransform extends RenderObject {
   }
 
   void add(RenderObject child) {
-    this.childRenderObject = child;
+    childRenderObject = child;
   }
 
   @override

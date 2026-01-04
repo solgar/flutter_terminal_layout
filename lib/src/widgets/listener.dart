@@ -5,14 +5,17 @@ import '../rendering/proxy.dart';
 
 class Listener extends SingleChildRenderObjectWidget {
   final PointerEventListener? onPointerDown;
+  final PointerEventListener? onPointerMove;
+  final PointerEventListener? onPointerUp;
   final PointerEventListener? onPointerScroll;
 
   const Listener({
-    super.key,
-    Widget? child,
     this.onPointerDown,
+    this.onPointerMove,
+    this.onPointerUp,
     this.onPointerScroll,
-  }) : super(child: child);
+    super.child,
+  });
 
   @override
   RenderObject createRenderObject(BuildContext context) {

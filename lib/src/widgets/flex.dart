@@ -43,26 +43,18 @@ class Row extends Flex {
   const Row({
     super.key,
     super.children,
-    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
-    int spacing = 0,
-  }) : super(
-         direction: FlexDirection.horizontal,
-         crossAxisAlignment: crossAxisAlignment,
-         spacing: spacing,
-       );
+    super.crossAxisAlignment,
+    super.spacing,
+  }) : super(direction: FlexDirection.horizontal);
 }
 
 class Column extends Flex {
   const Column({
     super.key,
     super.children,
-    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
-    int spacing = 0,
-  }) : super(
-         direction: FlexDirection.vertical,
-         crossAxisAlignment: crossAxisAlignment,
-         spacing: spacing,
-       );
+    super.crossAxisAlignment,
+    super.spacing,
+  }) : super(direction: FlexDirection.vertical);
 }
 
 class Expanded extends SingleChildRenderObjectWidget {
