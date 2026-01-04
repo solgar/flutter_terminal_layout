@@ -94,6 +94,12 @@ class _TextFieldState extends State<TextField> {
               }
               i += 4;
               continue;
+            } else if ((code == 53 || code == 54) &&
+                i + 3 < chars.length &&
+                chars[i + 3] == 126) {
+              // Page Up (5) / Page Down (6) - Ignore
+              i += 4;
+              continue;
             }
           }
         }
