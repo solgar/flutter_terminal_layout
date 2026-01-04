@@ -62,16 +62,35 @@ class _ClaudeCodeAppState extends State<ClaudeCodeApp> {
     });
   }
 
+  void _handleGlobalInput(List<int> chars) {
+    // Page Up: ESC [ 5 ~ (27, 91, 53, 126)
+    // Page Down: ESC [ 6 ~ (27, 91, 54, 126)
+    
+    if (chars.length >= 4 && chars[0] == 27 && chars[1] == 91 && chars[3] == 126) {
+      if (chars[2] == 53) {
+        // Page Up
+        final newOffset = max(0.0, _scrollController.offset - 5); // Scroll up 5 lines
+        _scrollController.jumpTo(newOffset);
+      } else if (chars[2] == 54) {
+        // Page Down
+        final newOffset = min(_scrollController.maxScrollExtent, _scrollController.offset + 5);
+        _scrollController.jumpTo(newOffset);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bgColor = Color.fromARGB(255, 20, 20, 20);
 
-    return Container(
-      decoration: BoxDecoration(color: bgColor),
-      padding: EdgeInsets.symmetric(horizontal: 1),
-      child: Column(
-        children: [
-          Container(height: 1), // Top margin
+    return KeyboardListener(
+      onKeyEvent: _handleGlobalInput,
+      child: Container(
+        decoration: BoxDecoration(color: bgColor),
+        padding: EdgeInsets.symmetric(horizontal: 1),
+        child: Column(
+          children: [
+            Container(height: 1), // Top margin
           
           // Chat List (includes Dashboard as header)
           Expanded(
@@ -160,6 +179,7 @@ class _ClaudeCodeAppState extends State<ClaudeCodeApp> {
           Container(height: 1),
         ],
       ),
+    ),
     );
   }
 }
