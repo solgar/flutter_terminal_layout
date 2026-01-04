@@ -76,6 +76,20 @@ class _TextFieldState extends State<TextField> {
               }
               i += 3;
               continue;
+            } else if (code == 51 &&
+                i + 3 < chars.length &&
+                chars[i + 3] == 126) {
+              // Delete (ESC [ 3 ~)
+              if (_controller.selectionIndex < _controller.text.length) {
+                var newText = _controller.text.substring(
+                      0,
+                      _controller.selectionIndex,
+                    ) +
+                    _controller.text.substring(_controller.selectionIndex + 1);
+                _controller.text = newText;
+              }
+              i += 4;
+              continue;
             }
           }
         }
@@ -113,7 +127,6 @@ class _TextFieldState extends State<TextField> {
     if (width <= 0) return;
 
     final prefixLen = widget.decorationPrefix?.length ?? 0;
-    final totalLen = prefixLen + _controller.text.length;
     final currentVisualIndex = prefixLen + _controller.selectionIndex;
 
     // Calculate current visual (row, col)
