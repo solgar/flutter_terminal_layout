@@ -99,20 +99,20 @@ class _TextFieldState extends State<TextField> {
 
     final List<TextSpan> spans = [];
     if (widget.decorationPrefix != null) {
-      spans.add(TextSpan(text: widget.decorationPrefix!, styleFg: Ansi.white));
+      spans.add(TextSpan(text: widget.decorationPrefix!, color: Colors.white));
     }
-    spans.add(TextSpan(text: before, styleFg: Ansi.white));
+    spans.add(TextSpan(text: before, color: Colors.white));
     spans.add(
-      TextSpan(text: cursorChar, styleFg: Ansi.black, styleBg: Ansi.white),
+      TextSpan(text: cursorChar, color: Colors.black, backgroundColor: Colors.white),
     );
-    spans.add(TextSpan(text: after, styleFg: Ansi.white));
+    spans.add(TextSpan(text: after, color: Colors.white));
 
     if (text.isEmpty && widget.placeholder != null) {
       // If text is empty, cursor is a space. We render placeholder after it?
       // Or if cursor is at 0, maybe we should render placeholder starting from cursor position?
       // But cursor is currently "inverted space".
       // Let's just append placeholder for now as a simple solution.
-      spans.add(TextSpan(text: widget.placeholder!, styleFg: Ansi.brightBlack));
+      spans.add(TextSpan(text: widget.placeholder!, color: Colors.brightBlack));
     }
 
     return KeyboardListener(

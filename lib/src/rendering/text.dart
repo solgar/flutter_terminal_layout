@@ -1,23 +1,34 @@
 import 'render_object.dart';
 import 'geometry.dart';
 import 'canvas.dart';
+import '../core/ansi.dart';
 
 class RenderText extends RenderObject {
   String _text;
-  String? _styleFg;
-  String? _styleBg;
+  Color? _color;
+  Color? _backgroundColor;
 
   List<String> _lines = [];
 
-  RenderText(this._text, {String? styleFg, String? styleBg})
-    : _styleFg = styleFg,
-      _styleBg = styleBg;
+  RenderText(this._text, {Color? color, Color? backgroundColor})
+    : _color = color,
+      _backgroundColor = backgroundColor;
 
   set text(String value) {
     if (_text == value) return;
     _text = value;
     // Mark needing layout? In this simple system, maybe just changing size is enough next frame.
     // In real flutter, markNeedsLayout().
+  }
+
+  set color(Color? value) {
+    if (_color == value) return;
+    _color = value;
+  }
+
+  set backgroundColor(Color? value) {
+    if (_backgroundColor == value) return;
+    _backgroundColor = value;
   }
 
   @override
@@ -64,8 +75,8 @@ class RenderText extends RenderObject {
         offset.dx,
         offset.dy + i,
         _lines[i],
-        fg: _styleFg,
-        bg: _styleBg,
+        fg: _color,
+        bg: _backgroundColor,
       );
     }
   }

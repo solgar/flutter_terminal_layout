@@ -7,12 +7,12 @@ class Panel extends StatelessWidget {
   final Widget? child;
   final double? width;
   final double? height;
-  final String? borderColor;
+  final Color? borderColor;
   final BorderStyle borderStyle;
-  final String? color;
+  final Color? color;
   final EdgeInsets? padding;
   final String? title;
-  final String? titleColor;
+  final Color? titleColor;
 
   const Panel({
     super.key,
@@ -31,7 +31,7 @@ class Panel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (title != null) {
-      final bColor = borderColor ?? Ansi.white;
+      final bColor = borderColor ?? Colors.white;
       final border = BorderSide(color: bColor, style: borderStyle);
       // Construct Header Row + Body
       return Column(
@@ -54,7 +54,7 @@ class Panel extends StatelessWidget {
                 decoration: BoxDecoration(border: BoxBorder(top: border)),
               ),
               // Title
-              Text(' $title ', styleFg: titleColor ?? Ansi.white),
+              Text(' $title ', color: titleColor ?? Colors.white),
               // Filler Line
               Expanded(
                 child: Container(
@@ -77,7 +77,7 @@ class Panel extends StatelessWidget {
               width: width?.toInt(),
               // height is handled by Column/Expanded
               decoration: BoxDecoration(
-                color: color ?? Ansi.bgRgb(20, 20, 20),
+                color: color ?? const Color(0xFF141414),
                 border: BoxBorder(left: border, right: border, bottom: border),
               ),
               padding: padding ?? EdgeInsets.all(1),
@@ -92,9 +92,9 @@ class Panel extends StatelessWidget {
       width: width?.toInt(),
       height: height?.toInt(),
       decoration: BoxDecoration(
-        color: color ?? Ansi.bgRgb(20, 20, 20),
+        color: color ?? const Color(0xFF141414),
         border: BoxBorder.all(
-          color: borderColor ?? Ansi.white,
+          color: borderColor ?? Colors.white,
           style: borderStyle,
         ),
       ),

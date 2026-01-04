@@ -44,32 +44,32 @@ class _LoadingDemoState extends State<LoadingDemo> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Ansi.bgBlack,
+      color: Colors.black,
       alignment: Alignment.center,
       child: Container(
         width: 50,
         height: 20,
         padding: EdgeInsets.all(1),
         decoration: BoxDecoration(
-          border: BoxBorder.all(color: Ansi.blue, style: BorderStyle.rounded),
+          border: BoxBorder.all(color: Colors.blue, style: BorderStyle.rounded),
         ),
         child: Column(
           children: [
             Container(height: 1),
-            Text('Loading Indicators Demo', styleFg: Ansi.brightWhite),
+            Text('Loading Indicators Demo', color: Colors.brightWhite),
             Container(height: 2),
 
-            Text('Spinner:', styleFg: Ansi.grey),
+            Text('Spinner:', color: Colors.grey),
             Container(height: 1),
             const Spinner(),
 
             Container(height: 2),
 
-            Text('Progress Bar:', styleFg: Ansi.grey),
+            Text('Progress Bar:', color: Colors.grey),
             Container(height: 1),
             ProgressBar(progress: _progress),
             Container(height: 1),
-            Text('${(_progress * 100).toInt()}%', styleFg: Ansi.green),
+            Text('${(_progress * 100).toInt()}%', color: Colors.green),
 
             Spacer(),
             Container(height: 1),
@@ -123,7 +123,7 @@ class _SpinnerState extends State<Spinner> {
 
   @override
   Widget build(BuildContext context) {
-    return Text(_frames[_index], styleFg: Ansi.cyan);
+    return Text(_frames[_index], color: Colors.cyan);
   }
 }
 
@@ -146,10 +146,10 @@ class ProgressBar extends StatelessWidget {
         RichText(
           text: TextSpan(
             children: [
-              TextSpan(text: '[', styleFg: Ansi.darkGray),
-              TextSpan(text: '█' * filled, styleFg: Ansi.cyan),
-              TextSpan(text: '░' * empty, styleFg: Ansi.darkGray),
-              TextSpan(text: ']', styleFg: Ansi.darkGray),
+              TextSpan(text: '[', color: Colors.darkGray),
+              TextSpan(text: '█' * filled, color: Colors.cyan),
+              TextSpan(text: '░' * empty, color: Colors.darkGray),
+              TextSpan(text: ']', color: Colors.darkGray),
             ],
           ),
         ),

@@ -72,9 +72,9 @@ class _FocusDemoState extends State<FocusDemo> {
     // Here we rely on parent setState to rebuild us.
     final bool isFocused = node.hasFocus;
     return Container(
-      color: isFocused ? Ansi.bgBlue : Ansi.bgWhite,
+      color: isFocused ? Colors.blue : Colors.white,
       alignment: Alignment.center,
-      child: Text(label, styleFg: isFocused ? Ansi.white : Ansi.black),
+      child: Text(label, color: isFocused ? Colors.white : Colors.black),
     );
   }
 }

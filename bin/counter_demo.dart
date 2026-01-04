@@ -32,14 +32,14 @@ class _CounterAppState extends State<CounterApp> {
         }
       },
       child: Container(
-        color: Ansi.bgBlue,
+        color: Colors.blue,
         child: Column(
           children: [
             Spacer(),
             Row(
               children: [
                 Spacer(),
-                Text(' Counter: $_counter ', styleFg: Ansi.white),
+                Text(' Counter: $_counter ', color: Colors.white),
                 Spacer(),
               ],
             ),

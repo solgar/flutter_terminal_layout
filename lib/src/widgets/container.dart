@@ -2,11 +2,11 @@ import 'framework.dart';
 import 'widget.dart';
 import '../rendering/render_object.dart';
 import '../rendering/container.dart';
-
 import '../rendering/geometry.dart';
+import '../core/ansi.dart';
 
 class Container extends SingleChildRenderObjectWidget {
-  final String? color;
+  final Color? color;
   final BoxDecoration? decoration;
   final int? width;
   final int? height;
@@ -50,14 +50,6 @@ class Container extends SingleChildRenderObjectWidget {
   BoxDecoration? _getEffectiveDecoration() {
     if (decoration != null) {
       if (color != null) {
-        // If both are provided, color in decoration takes precedence if not null,
-        // or we can copy decoration with overriding color.
-        // Flutter's behavior: assert they are not both provided.
-        // Here we'll let decoration take precedence but apply color if decoration has none?
-        // Let's mimic Flutter: if color is passed, it creates a decoration with that color.
-        // It's invalid to provide both.
-        // For simplicity towards user, let's treat `color` as `decoration: BoxDecoration(color: color)`
-        // If both provided, merge?
         return BoxDecoration(color: color, border: decoration!.border);
       }
       return decoration;

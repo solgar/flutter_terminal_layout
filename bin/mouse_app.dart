@@ -7,7 +7,7 @@ class MouseApp extends StatefulWidget {
 }
 
 class _MouseAppState extends State<MouseApp> {
-  final Map<int, String> _colors = {};
+  final Map<int, Color> _colors = {};
 
   @override
   Widget build(BuildContext context) {
@@ -19,40 +19,40 @@ class _MouseAppState extends State<MouseApp> {
         height: 1,
         child: Text(
           ' Click on cells to toggle Green/Blue ',
-          styleFg: Ansi.white,
-          styleBg: Ansi.bgBlack,
+          color: Colors.white,
+          backgroundColor: Colors.black,
         ),
       ),
     );
-    rows.add(Container(height: 1, color: Ansi.bgBlack));
+    rows.add(Container(height: 1, color: Colors.black));
 
     for (int y = 0; y < 5; y++) {
       final cols = <Widget>[];
       for (int x = 0; x < 5; x++) {
         final index = y * 5 + x;
-        final color = _colors[index] ?? Ansi.bgBlue;
+        final color = _colors[index] ?? Colors.blue;
 
         cols.add(
           Expanded(
             child: Listener(
               onPointerDown: (event) {
                 setState(() {
-                  if (_colors[index] == Ansi.bgGreen) {
-                    _colors[index] = Ansi.bgBlue;
+                  if (_colors[index] == Colors.green) {
+                    _colors[index] = Colors.blue;
                   } else {
-                    _colors[index] = Ansi.bgGreen;
+                    _colors[index] = Colors.green;
                   }
                 });
               },
               child: Container(
                 color: color,
                 // alignment: Alignment.center,
-                child: Text('$x,$y', styleFg: Ansi.white),
+                child: Text('$x,$y', color: Colors.white),
               ),
             ),
           ),
         );
-        if (x < 4) cols.add(Container(width: 1, color: Ansi.bgBlack));
+        if (x < 4) cols.add(Container(width: 1, color: Colors.black));
       }
       // Wrap Row in Expanded to fill vertical space
       rows.add(
@@ -63,11 +63,11 @@ class _MouseAppState extends State<MouseApp> {
           ),
         ),
       );
-      if (y < 4) rows.add(Container(height: 1, color: Ansi.bgBlack));
+      if (y < 4) rows.add(Container(height: 1, color: Colors.black));
     }
 
     // Add footer
-    rows.add(Container(height: 1, color: Ansi.bgBlack));
+    rows.add(Container(height: 1, color: Colors.black));
     rows.add(
       Container(
         height: 1,
@@ -75,8 +75,8 @@ class _MouseAppState extends State<MouseApp> {
           children: [
             Text(
               ' Ctrl+C to Exit ',
-              styleFg: Ansi.white,
-              styleBg: Ansi.bgBlack,
+              color: Colors.white,
+              backgroundColor: Colors.black,
             ),
             Spacer(),
           ],

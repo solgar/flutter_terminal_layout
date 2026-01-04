@@ -2,7 +2,7 @@ import 'package:flutter_terminal_layout/flutter_terminal_layout.dart';
 
 class VerticalDivider extends StatelessWidget {
   final int? width;
-  final String? color;
+  final Color? color;
   final int?
   thickness; // Ignored for now (always 1 char border) or used for spacing?
 
@@ -19,7 +19,7 @@ class VerticalDivider extends StatelessWidget {
     return Container(
       width: width ?? 1,
       decoration: BoxDecoration(
-        border: BoxBorder(left: BorderSide(color: color ?? Ansi.white)),
+        border: BoxBorder(left: BorderSide(color: color ?? Colors.white)),
       ),
     );
   }

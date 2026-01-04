@@ -9,9 +9,9 @@ class ClaudeCodeApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = Ansi.bgRgb(20, 20, 20);
+    final bgColor = Color.fromARGB(255, 20, 20, 20);
     // Peach/Red accent color (True Color)
-    final accentColorStr = Ansi.rgb(240, 95, 87);
+    final accentColorStr = Color.fromARGB(255, 240, 95, 87);
 
     return Container(
       decoration: BoxDecoration(color: bgColor),
@@ -27,14 +27,14 @@ class ClaudeCodeApp extends StatelessWidget {
                 Panel(
                   flex: 6,
                   title: 'Claude Code v2.0.23',
-                  titleColor: Ansi.white,
+                  titleColor: Colors.white,
                   borderColor: accentColorStr,
                   borderStyle: BorderStyle.solid,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Spacer(),
-                      Text('Welcome back Teresa!', styleFg: Ansi.brightWhite),
+                      Text('Welcome back Teresa!', color: Colors.brightWhite),
                       Container(height: 1),
 
                       // LOGO
@@ -42,10 +42,10 @@ class ClaudeCodeApp extends StatelessWidget {
 
                       Container(height: 1),
                       // User Info
-                      Text('Sonnet 4.5 • Claude Max', styleFg: Ansi.grey),
+                      Text('Sonnet 4.5 • Claude Max', color: Colors.grey),
                       Text(
                         '/Users/ttorres/Documents/Competitive Analysis',
-                        styleFg: Ansi.grey,
+                        color: Colors.grey,
                       ),
                       Spacer(),
                     ],
@@ -62,36 +62,36 @@ class ClaudeCodeApp extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Tips Header (Content)
-                      Text('Tips for getting started', styleFg: accentColorStr),
+                      Text('Tips for getting started', color: accentColorStr),
                       Container(height: 1),
                       // Tips content
-                      Text('Run /init to create a C...', styleFg: Ansi.white),
+                      Text('Run /init to create a C...', color: Colors.white),
                       Container(height: 1),
 
                       // "Tray" Separator Line [ └──────┘ ]
                       // Keeping this custom row as it's content-level styling
                       Row(
                         children: [
-                          Text('└', styleFg: Ansi.brightBlack),
+                          Text('└', color: Colors.brightBlack),
                           Expanded(
                             child: Container(
                               height: 1,
                               decoration: BoxDecoration(
                                 border: BoxBorder(
-                                  bottom: BorderSide(color: Ansi.brightBlack),
+                                  bottom: BorderSide(color: Colors.brightBlack),
                                 ),
                               ),
                             ),
                           ),
-                          Text('┘', styleFg: Ansi.brightBlack),
+                          Text('┘', color: Colors.brightBlack),
                         ],
                       ),
 
                       Container(height: 2),
 
                       // Recent Activity
-                      Text('Recent activity', styleFg: accentColorStr),
-                      Text('No recent activity', styleFg: Ansi.grey),
+                      Text('Recent activity', color: accentColorStr),
+                      Text('No recent activity', color: Colors.grey),
                       Spacer(),
                     ],
                   ),
@@ -106,7 +106,7 @@ class ClaudeCodeApp extends StatelessWidget {
             height: 3, // Fixed height for input
             decoration: BoxDecoration(
               border: BoxBorder.all(
-                color: Ansi.brightBlack,
+                color: Colors.brightBlack,
                 style: BorderStyle.solid,
               ),
             ),
@@ -120,9 +120,9 @@ class ClaudeCodeApp extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 1),
             child: Row(
               children: [
-                Text('? for shortcuts', styleFg: Ansi.grey),
+                Text('? for shortcuts', color: Colors.grey),
                 Spacer(),
-                Text('Thinking off (tab to toggle)', styleFg: Ansi.grey),
+                Text('Thinking off (tab to toggle)', color: Colors.grey),
               ],
             ),
           ),
@@ -139,12 +139,12 @@ class PixelArtLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // The "Box with eyes" logo
-    final color = Ansi.rgb(240, 95, 87);
+    final color = Color.fromARGB(255, 240, 95, 87);
     return Column(
       children: [
-        Text('  ▄▄▄▄▄▄▄  ', styleFg: color),
-        Text('  █ ▀ ▀ █  ', styleFg: color), // Eyes
-        Text('  █ ▄▄▄ █  ', styleFg: color), // Mouth/Bottom
+        Text('  ▄▄▄▄▄▄▄  ', color: color),
+        Text('  █ ▀ ▀ █  ', color: color), // Eyes
+        Text('  █ ▄▄▄ █  ', color: color), // Mouth/Bottom
       ],
     );
   }

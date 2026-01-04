@@ -35,7 +35,7 @@ class _GeminiAppState extends State<GeminiApp> {
       int g = (133 + (102 - 133) * t).toInt();
       int b = (244 + (170 - 244) * t).toInt();
 
-      spans.add(TextSpan(text: text[i], styleFg: Ansi.rgb(r, g, b)));
+      spans.add(TextSpan(text: text[i], color: Color.fromARGB(255, r, g, b)));
     }
     return RichText(text: TextSpan(children: spans));
   }
@@ -43,8 +43,8 @@ class _GeminiAppState extends State<GeminiApp> {
   @override
   Widget build(BuildContext context) {
     // Custom colors using RGB
-    final grey = Ansi.rgb(150, 150, 150);
-    final darkGrey = Ansi.rgb(100, 100, 100);
+    final grey = Color.fromARGB(255, 150, 150, 150);
+    final darkGrey = Color.fromARGB(255, 100, 100, 100);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -54,13 +54,13 @@ class _GeminiAppState extends State<GeminiApp> {
 
         Container(height: 1), // Replacement for SizedBox
         // 2. Tips Section
-        Text('Tips for getting started:', styleFg: Ansi.white),
-        Text('1. /help for more information.', styleFg: grey),
+        Text('Tips for getting started:', color: Colors.white),
+        Text('1. /help for more information.', color: grey),
         Text(
           '2. Ask coding questions, edit code or run commands.',
-          styleFg: grey,
+          color: grey,
         ),
-        Text('3. Be specific for the best results.', styleFg: grey),
+        Text('3. Be specific for the best results.', color: grey),
 
         Container(height: 2), // Replacement for SizedBox
         // 3. Status Bar
@@ -68,10 +68,10 @@ class _GeminiAppState extends State<GeminiApp> {
           children: [
             Text(
               'Using 1 GEMINI.md file and 1 MCP server (Ctrl+T to view descriptions)',
-              styleFg: darkGrey,
+              color: darkGrey,
             ),
             Spacer(),
-            Text('YOLO mode (ctrl + y to toggle)', styleFg: Ansi.red),
+            Text('YOLO mode (ctrl + y to toggle)', color: Colors.red),
           ],
         ),
 
@@ -80,7 +80,7 @@ class _GeminiAppState extends State<GeminiApp> {
         // 4. Input Box
         Container(
           decoration: BoxDecoration(
-            border: BoxBorder.all(color: Ansi.blue, style: BorderStyle.rounded),
+            border: BoxBorder.all(color: Colors.blue, style: BorderStyle.rounded),
           ),
           alignment: Alignment.center,
           padding: EdgeInsets.all(1),
@@ -104,13 +104,13 @@ class _GeminiAppState extends State<GeminiApp> {
         // 5. Footer
         Row(
           children: [
-            Text('~/code/research-apps/voice-notes-app ', styleFg: Ansi.cyan),
-            Text('(main*)', styleFg: grey),
-            Text('no sandbox ', styleFg: Ansi.red),
-            Text('(see docs) ', styleFg: grey),
+            Text('~/code/research-apps/voice-notes-app ', color: Colors.cyan),
+            Text('(main*)', color: grey),
+            Text('no sandbox ', color: Colors.red),
+            Text('(see docs) ', color: grey),
             Spacer(),
-            Text('gemini-2.5-pro-preview-06-05 ', styleFg: Ansi.blue),
-            Text('(100% context left)', styleFg: grey),
+            Text('gemini-2.5-pro-preview-06-05 ', color: Colors.blue),
+            Text('(100% context left)', color: grey),
           ],
         ),
       ],

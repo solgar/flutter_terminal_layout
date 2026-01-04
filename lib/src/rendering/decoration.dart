@@ -1,16 +1,18 @@
+import '../core/ansi.dart';
+
 /// Styles for the border.
 enum BorderStyle { none, solid, heavy, double, rounded, dashed }
 
 /// A side of a border of a box.
 class BorderSide {
-  final String? color;
+  final Color? color;
   final BorderStyle style;
 
   const BorderSide({this.color, this.style = BorderStyle.solid});
 
   static const BorderSide none = BorderSide(style: BorderStyle.none);
 
-  BorderSide copyWith({String? color, BorderStyle? style}) {
+  BorderSide copyWith({Color? color, BorderStyle? style}) {
     return BorderSide(color: color ?? this.color, style: style ?? this.style);
   }
 }
@@ -29,7 +31,7 @@ class BoxBorder {
     this.left = BorderSide.none,
   });
 
-  BoxBorder.all({String? color, BorderStyle style = BorderStyle.solid})
+  BoxBorder.all({Color? color, BorderStyle style = BorderStyle.solid})
     : top = BorderSide(color: color, style: style),
       right = BorderSide(color: color, style: style),
       bottom = BorderSide(color: color, style: style),
@@ -46,7 +48,7 @@ class BoxBorder {
 
 /// An immutable description of how to paint a box.
 class BoxDecoration {
-  final String? color;
+  final Color? color;
   final BoxBorder? border;
 
   const BoxDecoration({this.color, this.border});

@@ -90,18 +90,18 @@ class _MainDemoAppState extends State<MainDemoApp> {
     return KeyboardListener(
       onKeyEvent: _handleInput,
       child: Container(
-        color: Ansi.bgBlack,
+        color: Colors.black,
         alignment: Alignment.center,
         child: Container(
           width: 40,
           height: 20,
           padding: const EdgeInsets.all(1),
           decoration: BoxDecoration(
-            border: BoxBorder.all(color: Ansi.cyan, style: BorderStyle.double),
+            border: BoxBorder.all(color: Colors.cyan, style: BorderStyle.double),
           ),
           child: Column(
             children: [
-              Text('Main Demo Switcher', styleFg: Ansi.brightCyan),
+              Text('Main Demo Switcher', color: Colors.brightCyan),
               Container(height: 1),
               Expanded(
                 child: ListView.builder(
@@ -110,10 +110,10 @@ class _MainDemoAppState extends State<MainDemoApp> {
                     final isSelected = index == _selectedIndex;
                     final label = _demos[index].key;
                     return Container(
-                      color: isSelected ? Ansi.bgBlue : null,
+                      color: isSelected ? Colors.blue : null,
                       child: Text(
                         (isSelected ? '> ' : '  ') + label,
-                        styleFg: isSelected ? Ansi.white : Ansi.white,
+                        color: isSelected ? Colors.white : Colors.white,
                       ),
                     );
                   },
@@ -122,7 +122,7 @@ class _MainDemoAppState extends State<MainDemoApp> {
               Container(height: 1),
               Text(
                 'Up/Down/Enter. Esc=Back. q=Quit.',
-                styleFg: Ansi.brightBlack,
+                color: Colors.brightBlack,
               ),
             ],
           ),

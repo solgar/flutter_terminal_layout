@@ -37,7 +37,7 @@ class _ListDemoAppState extends State<ListDemoApp> {
             crossAxisAlignment: .stretch,
             children: [
               Expanded(
-                child: Container(color: Ansi.bgBlack, child: MouseApp()),
+                child: Container(color: Colors.black, child: MouseApp()),
               ),
             ],
           ),
@@ -69,8 +69,8 @@ class _ListDemoAppState extends State<ListDemoApp> {
       children: [
         Container(
           height: 3,
-          color: Ansi.bgMagenta,
-          child: Text(' Header (Fixed) ', styleFg: Ansi.white),
+          color: Colors.magenta,
+          child: Text(' Header (Fixed) ', color: Colors.white),
         ),
         Expanded(
           child: ListView.builder(
@@ -80,16 +80,16 @@ class _ListDemoAppState extends State<ListDemoApp> {
               return Container(
                 height: 3, // height 3
                 width: 20, // width 20
-                color: (i % 2 == 0) ? Ansi.bgBlue : Ansi.bgCyan,
-                child: Text('Item $i', styleFg: Ansi.white),
+                color: (i % 2 == 0) ? Colors.blue : Colors.cyan,
+                child: Text('Item $i', color: Colors.white),
               );
             },
           ),
         ),
         Container(
           height: 3,
-          color: Ansi.bgMagenta,
-          child: Text(' Footer (Fixed) ', styleFg: Ansi.white),
+          color: Colors.magenta,
+          child: Text(' Footer (Fixed) ', color: Colors.white),
         ),
       ],
     ),

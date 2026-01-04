@@ -8,7 +8,7 @@ class DemoApp extends StatelessWidget {
     return Column(
       children: [
         Container(
-          color: Ansi.bgBlue,
+          color: Colors.blue,
           height: 5,
           child: Column(
             children: [
@@ -16,7 +16,7 @@ class DemoApp extends StatelessWidget {
               Row(
                 children: [
                   Spacer(),
-                  Text(' FLUTTER TERMINAL LAYOUT DEMO ', styleFg: Ansi.white),
+                  Text(' FLUTTER TERMINAL LAYOUT DEMO ', color: Colors.white),
                   Spacer(),
                 ],
               ),
@@ -30,13 +30,13 @@ class DemoApp extends StatelessWidget {
             children: [
               Expanded(
                 child: Container(
-                  color: Ansi.bgRed,
+                  color: Colors.red,
                   // Height removed to allow filling parent Expanded
                   child: Column(
                     children: [
-                      Text(' Left Panel ', styleFg: Ansi.white),
+                      Text(' Left Panel ', color: Colors.white),
                       Spacer(),
-                      Text(' Bottom Left ', styleFg: Ansi.white),
+                      Text(' Bottom Left ', color: Colors.white),
                     ],
                   ),
                 ),
@@ -45,36 +45,36 @@ class DemoApp extends StatelessWidget {
               Expanded(
                 flex: 2,
                 child: Container(
-                  color: Ansi.bgGreen,
+                  color: Colors.green,
                   // Height removed to allow filling parent Expanded
                   child: Column(
                     children: [
-                      Text(' Right Panel (Flex 2) ', styleFg: Ansi.black),
+                      Text(' Right Panel (Flex 2) ', color: Colors.black),
                       Container(
-                        color: Ansi.bgCyan,
+                        color: Colors.cyan,
                         child: Text(
                           'Verry long text to check, test and implement text wrapping and overflow. Lorem ipsum.',
-                          styleFg: Ansi.black,
+                          color: Colors.black,
                         ),
                       ),
                       Container(
-                        color: Ansi.bgCyan,
+                        color: Colors.cyan,
                         child: Text(
                           'Verry long text to check, test and implement text wrapping and overflow. Lorem ipsum.',
-                          styleFg: Ansi.black,
+                          color: Colors.black,
                         ),
                       ),
                       Container(
-                        color: Ansi.bgCyan,
+                        color: Colors.cyan,
                         child: Text(
                           'Verry long text to check, test and implement text wrapping and overflow. Lorem ipsum.',
-                          styleFg: Ansi.black,
+                          color: Colors.black,
                         ),
                       ),
-                      // Container(height: 1, color: Ansi.bgBlack),
+                      // Container(height: 1, color: Colors.black),
                       Spacer(),
-                      Text(' Content Line 2 ', styleFg: Ansi.black),
-                      Text(' Content Line 3 ', styleFg: Ansi.black),
+                      Text(' Content Line 2 ', color: Colors.black),
+                      Text(' Content Line 3 ', color: Colors.black),
                     ],
                   ),
                 ),
@@ -85,13 +85,13 @@ class DemoApp extends StatelessWidget {
 
         // Spacer expanded Row takes all space
         Container(
-          color: Ansi.bgYellow,
+          color: Colors.yellow,
           height: 1,
           child: Row(
             children: [
-              Text(' Footer Status: OK ', styleFg: Ansi.black),
+              Text(' Footer Status: OK ', color: Colors.black),
               Spacer(),
-              Text(' v1.0.0 ', styleFg: Ansi.black),
+              Text(' v1.0.0 ', color: Colors.black),
             ],
           ),
         ),

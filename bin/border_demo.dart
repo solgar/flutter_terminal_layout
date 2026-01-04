@@ -12,7 +12,7 @@ class BorderDemo extends StatelessWidget {
         Container(
           height: 1,
           width: width,
-          color: Ansi.bgBlue,
+          color: Colors.blue,
           alignment: Alignment.center,
           child: Text('Border Layout Demo'),
         ),
@@ -25,7 +25,7 @@ class BorderDemo extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   border: BoxBorder.all(
-                    color: Ansi.green,
+                    color: Colors.green,
                     style: BorderStyle.rounded,
                   ),
                 ),
@@ -39,7 +39,7 @@ class BorderDemo extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   border: BoxBorder.all(
-                    color: Ansi.red,
+                    color: Colors.red,
                     style: BorderStyle.double,
                   ),
                 ),
@@ -57,7 +57,7 @@ class BorderDemo extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   border: BoxBorder.all(
-                    color: Ansi.yellow,
+                    color: Colors.yellow,
                     style: BorderStyle.heavy,
                   ),
                 ),
@@ -71,7 +71,7 @@ class BorderDemo extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   border: BoxBorder.all(
-                    color: Ansi.cyan,
+                    color: Colors.cyan,
                     style: BorderStyle.rounded,
                   ),
                 ),

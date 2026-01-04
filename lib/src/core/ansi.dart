@@ -1,3 +1,7 @@
+import 'colors.dart';
+
+export 'colors.dart';
+
 /// Helper class for ANSI escape codes.
 class Ansi {
   static const String esc = '\x1b';
@@ -17,56 +21,23 @@ class Ansi {
   static const String disableAltBuffer = '$esc[?1049l';
 
   // Mouse
-  // 1000h: Click tracking
-  // 1006h: SGR extended coordinates
   static const String enableMouse = '$esc[?1000h$esc[?1006h';
   static const String disableMouse = '$esc[?1000l$esc[?1006l';
 
-  // Colors - Foreground
+  // Reset
   static const String reset = '$esc[0m';
-  static const String white = '$esc[37m';
-  static const String black = '$esc[30m';
-  static const String red = '$esc[31m';
-  static const String green = '$esc[32m';
-  static const String yellow = '$esc[33m';
-  static const String blue = '$esc[34m';
-  static const String magenta = '$esc[35m';
-  static const String cyan = '$esc[36m';
-  // static const String white = '$esc[37m'; // Already defined above
 
-  // Bright/Bold Colors
-  static const String brightBlack = '$esc[90m'; // Dark Grey
-  static const String grey = '$esc[90m';
-  static const String darkGray = '$esc[90m';
-  static const String brightRed = '$esc[91m';
-  static const String brightGreen = '$esc[92m';
-  static const String brightYellow = '$esc[93m';
-  static const String brightBlue = '$esc[94m';
-  static const String brightMagenta = '$esc[95m';
-  static const String brightCyan = '$esc[96m';
-  static const String brightWhite = '$esc[97m';
-
-  // Colors - Background
-  static const String bgWhite = '$esc[47m';
-  static const String bgBlack = '$esc[40m';
-  static const String bgRed = '$esc[41m';
-  static const String bgGreen = '$esc[42m';
-  static const String bgYellow = '$esc[43m';
-  static const String bgBlue = '$esc[44m';
-  static const String bgMagenta = '$esc[45m';
-  static const String bgCyan = '$esc[46m';
+  // Colors - Backward compatibility helpers (Deprecated)
+  // We encourage using Colors.red.ansiFg instead.
+  // ... keeping these removed to force refactor is cleaner based on user request.
 
   /// Generates a colored string.
-  static String color(String text, {String? fg, String? bg}) {
+  static String color(String text, {Color? fg, Color? bg}) {
     final StringBuffer buffer = StringBuffer();
-    if (fg != null) buffer.write(fg);
-    if (bg != null) buffer.write(bg);
+    if (fg != null) buffer.write(fg.ansiFg);
+    if (bg != null) buffer.write(bg.ansiBg);
     buffer.write(text);
     if (fg != null || bg != null) buffer.write(reset);
     return buffer.toString();
   }
-
-  // TrueColor (RGB)
-  static String rgb(int r, int g, int b) => '$esc[38;2;$r;$g;${b}m';
-  static String bgRgb(int r, int g, int b) => '$esc[48;2;$r;$g;${b}m';
 }

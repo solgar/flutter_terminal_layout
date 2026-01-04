@@ -2,20 +2,21 @@ import 'framework.dart';
 import 'widget.dart';
 import '../rendering/render_object.dart';
 import '../rendering/text.dart';
+import '../core/ansi.dart';
 
 class Text extends RenderObjectWidget {
   final String text;
-  final String? styleFg;
-  final String? styleBg;
+  final Color? color;
+  final Color? backgroundColor;
 
-  const Text(this.text, {super.key, this.styleFg, this.styleBg});
+  const Text(this.text, {super.key, this.color, this.backgroundColor});
 
   @override
   Element createElement() => LeafRenderObjectElement(this);
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return RenderText(text, styleFg: styleFg, styleBg: styleBg);
+    return RenderText(text, color: color, backgroundColor: backgroundColor);
   }
 
   @override
@@ -24,5 +25,7 @@ class Text extends RenderObjectWidget {
     covariant RenderText renderObject,
   ) {
     renderObject.text = text;
+    renderObject.color = color;
+    renderObject.backgroundColor = backgroundColor;
   }
 }

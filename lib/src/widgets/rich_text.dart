@@ -2,26 +2,26 @@ import 'framework.dart';
 import 'widget.dart';
 import '../rendering/render_object.dart';
 import '../rendering/canvas.dart';
-
 import '../rendering/geometry.dart';
+import '../core/ansi.dart';
 
 /// An immutable span of text.
 class TextSpan {
   final String? text;
-  final String? styleFg;
-  final String? styleBg;
+  final Color? color;
+  final Color? backgroundColor;
   final List<TextSpan>? children;
 
-  const TextSpan({this.text, this.styleFg, this.styleBg, this.children});
+  const TextSpan({this.text, this.color, this.backgroundColor, this.children});
 
   /// Flattens the span tree into a list of styled segments for easier rendering.
   void visitChildren(
-    void Function(String text, String? fg, String? bg) visitor, {
-    String? parentFg,
-    String? parentBg,
+    void Function(String text, Color? fg, Color? bg) visitor, {
+    Color? parentFg,
+    Color? parentBg,
   }) {
-    final effectiveFg = styleFg ?? parentFg;
-    final effectiveBg = styleBg ?? parentBg;
+    final effectiveFg = color ?? parentFg;
+    final effectiveBg = backgroundColor ?? parentBg;
 
     if (text != null) {
       visitor(text!, effectiveFg, effectiveBg);
@@ -106,8 +106,8 @@ class RenderParagraph extends RenderObject {
 
     for (final segment in segments) {
       String text = segment.text;
-      String? fg = segment.fg;
-      String? bg = segment.bg;
+      Color? fg = segment.fg;
+      Color? bg = segment.bg;
 
       while (text.isNotEmpty) {
         int available = maxWidth - currentWidth;
@@ -162,7 +162,7 @@ class RenderParagraph extends RenderObject {
 
 class _StyledSpan {
   final String text;
-  final String? fg;
-  final String? bg;
+  final Color? fg;
+  final Color? bg;
   _StyledSpan(this.text, this.fg, this.bg);
 }

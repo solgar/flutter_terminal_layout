@@ -3,6 +3,7 @@ import 'geometry.dart';
 import 'canvas.dart';
 import 'constraints.dart';
 import 'decoration.dart';
+import '../core/ansi.dart';
 
 class RenderContainer extends RenderObject {
   BoxDecoration? decoration;
@@ -40,8 +41,8 @@ class RenderContainer extends RenderObject {
   }
 
   // Helper getters for color compatibility
-  String? get color => decoration?.color;
-  set color(String? value) {
+  Color? get color => decoration?.color;
+  set color(Color? value) {
     if (value == null && decoration == null) return;
     if (decoration == null) {
       decoration = BoxDecoration(color: value);
@@ -209,7 +210,7 @@ class RenderContainer extends RenderObject {
         // Use generic '+' if maskToChar fails (shouldn't happen for valid masks)
         String char = Canvas.maskToChar[mask] ?? '+';
         // Pick color (priority: top, left, bottom, right)
-        String? color =
+        Color? color =
             border.top.color ??
             border.left.color ??
             border.bottom.color ??
@@ -269,7 +270,7 @@ class RenderContainer extends RenderObject {
     // Top Left
     if (hasTop || hasLeft) {
       String char;
-      String? color;
+      Color? color;
       if (hasTop && hasLeft) {
         char = _topLeftChar(border.top.style);
         color = border.top.color ?? border.left.color;
@@ -286,7 +287,7 @@ class RenderContainer extends RenderObject {
     // Top Right
     if (hasTop || hasRight) {
       String char;
-      String? color;
+      Color? color;
       if (hasTop && hasRight) {
         char = _topRightChar(border.top.style);
         color = border.top.color ?? border.right.color;
@@ -303,7 +304,7 @@ class RenderContainer extends RenderObject {
     // Bottom Left
     if (hasBottom || hasLeft) {
       String char;
-      String? color;
+      Color? color;
       if (hasBottom && hasLeft) {
         char = _bottomLeftChar(border.bottom.style);
         color = border.bottom.color ?? border.left.color;
@@ -320,7 +321,7 @@ class RenderContainer extends RenderObject {
     // Bottom Right
     if (hasBottom || hasRight) {
       String char;
-      String? color;
+      Color? color;
       if (hasBottom && hasRight) {
         char = _bottomRightChar(border.bottom.style);
         color = border.bottom.color ?? border.right.color;

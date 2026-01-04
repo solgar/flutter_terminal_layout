@@ -3,8 +3,8 @@ import 'geometry.dart';
 
 class Cell {
   String char;
-  String? fgColor;
-  String? bgColor;
+  Color? fgColor;
+  Color? bgColor;
   bool isBorder;
 
   Cell(this.char, {this.fgColor, this.bgColor, this.isBorder = false});
@@ -99,8 +99,8 @@ class Canvas {
     int x,
     int y,
     String char, {
-    String? fg,
-    String? bg,
+    Color? fg,
+    Color? bg,
     bool isBorder = false,
   }) {
     if (x < 0 || x >= width || y < 0 || y >= height) return;
@@ -140,7 +140,7 @@ class Canvas {
     if (bg != null) cell.bgColor = bg;
   }
 
-  void drawText(int x, int y, String text, {String? fg, String? bg}) {
+  void drawText(int x, int y, String text, {Color? fg, Color? bg}) {
     // Optimization to skip if y is totally out (requires Rect checks of range)
     // For now simple per-char check in setCell works.
     for (int i = 0; i < text.length; i++) {
@@ -154,8 +154,8 @@ class Canvas {
     int w,
     int h, {
     String? char,
-    String? fg,
-    String? bg,
+    Color? fg,
+    Color? bg,
   }) {
     for (int r = y; r < y + h; r++) {
       for (int c = x; c < x + w; c++) {
