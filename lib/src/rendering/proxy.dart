@@ -6,6 +6,7 @@ import '../core/events.dart';
 
 class RenderPointerListener extends RenderObject {
   PointerEventListener? onPointerDown;
+  PointerEventListener? onPointerScroll;
 
   RenderObject? _child;
   RenderObject? get child => _child;
@@ -18,7 +19,11 @@ class RenderPointerListener extends RenderObject {
     }
   }
 
-  RenderPointerListener({this.onPointerDown, RenderObject? child}) {
+  RenderPointerListener({
+    this.onPointerDown,
+    this.onPointerScroll,
+    RenderObject? child,
+  }) {
     this.child = child;
   }
 
@@ -55,6 +60,8 @@ class RenderPointerListener extends RenderObject {
   void handleEvent(PointerEvent event) {
     if (event is PointerDownEvent && onPointerDown != null) {
       onPointerDown!(event);
+    } else if (event is PointerScrollEvent && onPointerScroll != null) {
+      onPointerScroll!(event);
     }
   }
 }

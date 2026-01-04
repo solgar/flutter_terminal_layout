@@ -13,6 +13,11 @@ class PointerUpEvent extends PointerEvent {
   const PointerUpEvent({required super.position});
 }
 
+class PointerScrollEvent extends PointerEvent {
+  final Offset scrollDelta;
+  const PointerScrollEvent({required super.position, required this.scrollDelta});
+}
+
 abstract class KeyEvent {
   const KeyEvent();
 }

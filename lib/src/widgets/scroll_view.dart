@@ -1,8 +1,10 @@
 import 'framework.dart';
 import 'widget.dart';
 import 'flex.dart';
+import 'listener.dart';
 import '../rendering/render_object.dart';
 import '../rendering/viewport.dart';
+import '../core/events.dart';
 
 class ScrollController {
   double _offset;
@@ -137,17 +139,30 @@ class _ListViewState extends State<ListView> {
       children = widget.children;
     }
 
-    return Viewport(
-      offset: _controller.offset,
-      onLayoutChanged: (max) {
-        // Only update if changed to avoid loops?
-        if (_controller.maxScrollExtent != max) {
-          _controller.setMaxScrollExtent(max);
+    return Listener(
+      onPointerScroll: (event) {
+        if (event is PointerScrollEvent) {
+          double newOffset = _controller.offset + event.scrollDelta.dy;
+          // Clamp
+          if (newOffset < 0) newOffset = 0;
+          if (newOffset > _controller.maxScrollExtent) {
+            newOffset = _controller.maxScrollExtent;
+          }
+          _controller.jumpTo(newOffset);
         }
       },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch, // Fill width
-        children: children,
+      child: Viewport(
+        offset: _controller.offset,
+        onLayoutChanged: (max) {
+          // Only update if changed to avoid loops?
+          if (_controller.maxScrollExtent != max) {
+            _controller.setMaxScrollExtent(max);
+          }
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch, // Fill width
+          children: children,
+        ),
       ),
     );
   }

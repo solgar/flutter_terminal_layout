@@ -624,18 +624,36 @@ class TerminalApp {
               final RegExp regex = RegExp(r'\x1b\[<(\d+);(\d+);(\d+)([Mm])');
               final match = regex.firstMatch(s);
               if (match != null) {
-                // final b = int.parse(match.group(1)!);
+                final b = int.parse(match.group(1)!);
                 final x = int.parse(match.group(2)!);
                 final y = int.parse(match.group(3)!);
                 final type = match.group(4)!;
 
                 if (type == 'M') {
-                  // Press (Button down)
-                  // B: 0=Left, 1=Middle, 2=Right
-                  // We treat any click as pointer down for now
-                  dispatchPointerEvent(
-                    PointerDownEvent(position: Offset(x - 1, y - 1)),
-                  );
+                  if (b == 64) {
+                    // Scroll Up
+                    dispatchPointerEvent(
+                      PointerScrollEvent(
+                        position: Offset(x - 1, y - 1),
+                        scrollDelta: Offset(0, -1),
+                      ),
+                    );
+                  } else if (b == 65) {
+                    // Scroll Down
+                    dispatchPointerEvent(
+                      PointerScrollEvent(
+                        position: Offset(x - 1, y - 1),
+                        scrollDelta: Offset(0, 1),
+                      ),
+                    );
+                  } else {
+                    // Press (Button down)
+                    // B: 0=Left, 1=Middle, 2=Right
+                    // We treat any click as pointer down for now
+                    dispatchPointerEvent(
+                      PointerDownEvent(position: Offset(x - 1, y - 1)),
+                    );
+                  }
                 }
                 draw();
                 return; // Consume mouse event
