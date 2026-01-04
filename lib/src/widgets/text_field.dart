@@ -103,7 +103,7 @@ class _TextFieldState extends State<TextField> {
             _controller.text = newText;
             _controller.selectionIndex--;
           }
-        } else if (char == 13) {
+        } else if (char == 13 || char == 10) {
           // Enter
           widget.onSubmitted?.call(_controller.text);
         } else if (char >= 32 && char <= 126) {
