@@ -23,30 +23,33 @@ class _CounterAppState extends State<CounterApp> {
 
   @override
   Widget build(BuildContext context) {
-    return KeyboardListener(
-      onKeyEvent: (input) {
-        if (input.contains(32)) {
-          setState(() {
-            _counter++;
-          });
-        }
-      },
-      child: Container(
-        color: Colors.blue,
-        child: Column(
-          children: [
-            Spacer(),
-            Row(
-              children: [
-                Spacer(),
-                Text(' Counter: $_counter ', color: Colors.white),
-                Spacer(),
-              ],
-            ),
-            Spacer(),
-          ],
+    return Stack(
+      children: [
+        KeyboardListener(
+          onKeyEvent: _onKeyEvent,
+          child: Container(
+            color: Colors.blue,
+            alignment: Alignment.center,
+            child: Text(' Counter: $_counter ', color: Colors.white),
+          ),
         ),
-      ),
+        Positioned(
+          bottom: 0,
+          left: 0,
+          child: Text(
+            ' ESC to go back, space to increment',
+            color: Colors.white,
+          ),
+        ),
+      ],
     );
+  }
+
+  void _onKeyEvent(List<int> input) {
+    if (input.contains(Keys.space)) {
+      setState(() {
+        _counter++;
+      });
+    }
   }
 }

@@ -2,6 +2,7 @@ export 'src/widgets/framework.dart';
 export 'src/widgets/widget.dart';
 export 'src/widgets/text.dart';
 export 'src/widgets/container.dart';
+export 'src/widgets/center.dart';
 export 'src/widgets/flex.dart';
 export 'src/widgets/keyboard_listener.dart';
 export 'src/widgets/listener.dart';

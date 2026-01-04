@@ -5,20 +5,40 @@ import 'package:meta/meta.dart';
 
 @immutable
 class Key {
-  final String? value;
-  const Key(this.value);
+  final String? _value;
+  const Key(this._value);
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is Key && other.value == value;
+    return other is Key && other._value == _value;
   }
 
   @override
-  int get hashCode => value.hashCode;
+  int get hashCode => _value.hashCode;
 
   @override
-  String toString() => 'Key($value)';
+  String toString() => 'Key($_value)';
+}
+
+class ValueKey<T> extends Key {
+  final T value;
+  const ValueKey(this.value) : super(null);
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) return false;
+    return other is ValueKey<T> && other.value == value;
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, value);
+
+  @override
+  String toString() {
+    final String valueString = T == String ? "<'$value'>" : '<$value>';
+    return 'ValueKey$valueString';
+  }
 }
 
 abstract class Widget {
