@@ -80,53 +80,6 @@ class _LoadingDemoState extends State<LoadingDemo> {
   }
 }
 
-class Spinner extends StatefulWidget {
-  const Spinner({super.key});
-
-  @override
-  State<Spinner> createState() => _SpinnerState();
-}
-
-class _SpinnerState extends State<Spinner> {
-  int _index = 0;
-  final List<String> _frames = [
-    '⠋',
-    '⠙',
-    '⠹',
-    '⠸',
-    '⠼',
-    '⠴',
-    '⠦',
-    '⠧',
-    '⠇',
-    '⠏',
-  ];
-  Timer? _timer;
-
-  @override
-  void initState() {
-    super.initState();
-    _timer = Timer.periodic(const Duration(milliseconds: 80), (timer) {
-      if (mounted) {
-        setState(() {
-          _index = (_index + 1) % _frames.length;
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(_frames[_index], color: Colors.cyan);
-  }
-}
-
 class ProgressBar extends StatelessWidget {
   final double progress;
   final int width;

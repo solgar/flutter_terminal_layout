@@ -1,17 +1,70 @@
 import 'package:flutter_terminal_layout/flutter_terminal_layout.dart';
+import 'dart:async';
+import 'dart:math';
 
 void main() {
   runApp(ClaudeCodeApp());
 }
 
-class ClaudeCodeApp extends StatelessWidget {
+class ClaudeCodeApp extends StatefulWidget {
   const ClaudeCodeApp({super.key});
+
+  @override
+  State<ClaudeCodeApp> createState() => _ClaudeCodeAppState();
+}
+
+class _ClaudeCodeAppState extends State<ClaudeCodeApp> {
+  final List<String> _messages = [];
+  final ScrollController _scrollController = ScrollController();
+  final TextEditingController _textController = TextEditingController();
+  bool _isLoading = false;
+
+  final List<String> _randomResponses = [
+    "I can help with that.",
+    "Analyzing the codebase...",
+    "Here is the refactored code.",
+    "Running tests...",
+    "Found 3 errors.",
+    "Deployment successful.",
+    "Explain line 42?",
+    "Processing data...",
+    "Configuration updated.",
+    "Hello! How can I assist you today?"
+  ];
+
+  void _handleSubmit(String text) {
+    if (text.trim().isEmpty) return;
+
+    setState(() {
+      _messages.add(text);
+      _textController.clear();
+      _isLoading = true;
+    });
+
+    _scrollToBottom();
+
+    // Simulate response
+    Timer(const Duration(milliseconds: 1500), () {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _messages.add(_randomResponses[Random().nextInt(_randomResponses.length)]);
+        });
+        _scrollToBottom();
+      }
+    });
+  }
+
+  void _scrollToBottom() {
+    // Schedule scroll after build
+    Timer(const Duration(milliseconds: 50), () {
+      _scrollController.jumpTo(_scrollController.maxScrollExtent);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final bgColor = Color.fromARGB(255, 20, 20, 20);
-    // Peach/Red accent color (True Color)
-    final accentColorStr = Color.fromARGB(255, 240, 95, 87);
 
     return Container(
       decoration: BoxDecoration(color: bgColor),
@@ -19,9 +72,124 @@ class ClaudeCodeApp extends StatelessWidget {
       child: Column(
         children: [
           Container(height: 1), // Top margin
-          // MAIN CONTENT SPLIT (Using HPanel with titled Panels)
+          
+          // Chat List (includes Dashboard as header)
           Expanded(
-            child: HPanel(
+            child: ListView.builder(
+              controller: _scrollController,
+              itemCount: 1 + _messages.length + (_isLoading ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return Dashboard(compact: _messages.isNotEmpty);
+                }
+                
+                // Adjust index for messages
+                int msgIndex = index - 1;
+                
+                if (msgIndex < _messages.length) {
+                   // Message Bubble
+                   // Even index in list = User, Odd = Bot
+                   final bool isUserMessage = (msgIndex % 2 == 0);
+                   
+                   return Container(
+                     padding: EdgeInsets.symmetric(vertical: 1),
+                     child: Row(
+                       crossAxisAlignment: CrossAxisAlignment.start,
+                       children: [
+                         if (isUserMessage) ...[
+                             Spacer(),
+                             Container(
+                               decoration: BoxDecoration(
+                                 color: Color.fromARGB(255, 60, 60, 60),
+                                 border: BoxBorder.all(color: Colors.grey, style: BorderStyle.rounded),
+                               ),
+                               padding: EdgeInsets.symmetric(horizontal: 2, vertical: 0),
+                               child: Text(_messages[msgIndex], color: Colors.white),
+                             ),
+                         ] else ...[
+                             Text('Claude: ', color: Color.fromARGB(255, 240, 95, 87)),
+                             Expanded(child: Text(_messages[msgIndex], color: Colors.white)),
+                         ],
+                       ],
+                     ),
+                   );
+                }
+                
+                // Loading Indicator
+                return Container(
+                   padding: EdgeInsets.symmetric(vertical: 1),
+                   child: Row(
+                     children: [
+                       Text('Claude: ', color: Color.fromARGB(255, 240, 95, 87)),
+                       const Spinner(),
+                     ],
+                   ),
+                );
+              },
+            ),
+          ),
+
+          // INPUT AREA
+          Container(height: 1),
+          Container(
+            decoration: BoxDecoration(
+              border: BoxBorder.all(
+                color: Colors.brightBlack,
+                style: BorderStyle.solid,
+              ),
+            ),
+            padding: EdgeInsets.all(1),
+            child: TextField(
+              controller: _textController,
+              decorationPrefix: '> ',
+              placeholder: 'Try "how does <filepath> work?"',
+              onSubmitted: _handleSubmit,
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 1),
+            child: Row(
+              children: [
+                Text('? for shortcuts', color: Colors.grey),
+                Spacer(),
+                Text('Thinking off (tab to toggle)', color: Colors.grey),
+              ],
+            ),
+          ),
+          Container(height: 1),
+        ],
+      ),
+    );
+  }
+}
+
+class Dashboard extends StatelessWidget {
+  final bool compact;
+  
+  const Dashboard({super.key, required this.compact});
+
+  @override
+  Widget build(BuildContext context) {
+     final accentColorStr = Color.fromARGB(255, 240, 95, 87);
+     
+     if (compact) {
+       // Minimal header when chat is active
+       // "panels should shrink in height... down to some hardcoded value"
+       // We'll just show a small header instead of the big panels.
+       return Container(
+         height: 3,
+         decoration: BoxDecoration(
+           border: BoxBorder(bottom: BorderSide(color: Colors.darkGray)),
+         ),
+         alignment: Alignment.center,
+         child: Text('Claude Code v2.0.23', color: Colors.grey),
+       );
+     }
+     
+     // Full Dashboard
+     return Container(
+       height: 25, // Fixed height to allow proper layout inside List item
+       child: HPanel(
               children: [
                 // LEFT PANEL
                 Panel(
@@ -68,8 +236,7 @@ class ClaudeCodeApp extends StatelessWidget {
                       Text('Run /init to create a C...', color: Colors.white),
                       Container(height: 1),
 
-                      // "Tray" Separator Line [ └──────┘ ]
-                      // Keeping this custom row as it's content-level styling
+                      // "Tray" Separator Line
                       Row(
                         children: [
                           Text('└', color: Colors.brightBlack),
@@ -98,37 +265,7 @@ class ClaudeCodeApp extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-
-          // INPUT AREA (Outside Panel)
-          Container(height: 1),
-          Container(
-            decoration: BoxDecoration(
-              border: BoxBorder.all(
-                color: Colors.brightBlack,
-                style: BorderStyle.solid,
-              ),
-            ),
-            padding: EdgeInsets.all(1),
-            child: TextField(
-              decorationPrefix: '> ',
-              placeholder: 'Try "how does <filepath> work?"',
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 1),
-            child: Row(
-              children: [
-                Text('? for shortcuts', color: Colors.grey),
-                Spacer(),
-                Text('Thinking off (tab to toggle)', color: Colors.grey),
-              ],
-            ),
-          ),
-          Container(height: 1),
-        ],
-      ),
-    );
+     );
   }
 }
 
