@@ -552,6 +552,8 @@ class TerminalApp {
 
       int lastFrameTime = 0; // Moved up
       bool isFrameScheduled = false;
+      Canvas? canvas;
+
       void draw() {
         isFrameScheduled = false;
         lastFrameTime = DateTime.now().millisecondsSinceEpoch;
@@ -569,12 +571,25 @@ class TerminalApp {
           final width = _terminal.width;
           final height = _terminal.height;
 
+          // Resize canvas if needed
+          if (canvas == null || canvas!.width != width || canvas!.height != height) {
+            canvas = Canvas(Size(width, height));
+            // Force full repaint on resize?
+            // The new canvas starts empty. The first diff will likely redraw everything 
+            // if front buffer is empty/default.
+            // Actually, a new Canvas has empty front buffer.
+            // If we just resized, we probably want to clear screen first?
+            _terminal.write(Ansi.clearScreen); 
+          } else {
+             // Clear back buffer for new frame
+             canvas!.clear();
+          }
+
           rootRenderObject.layout(BoxConstraints.tight(Size(width, height)));
 
-          final canvas = Canvas(Size(width, height));
-          rootRenderObject.paint(canvas, Offset.zero);
+          rootRenderObject.paint(canvas!, Offset.zero);
 
-          _terminal.write(canvas.render());
+          _terminal.write(canvas!.diff());
         }
       }
 

@@ -17,12 +17,33 @@ class Cell {
     bgColor = null;
     isBorder = false;
   }
+
+  void copyFrom(Cell other) {
+    char = other.char;
+    fgColor = other.fgColor;
+    bgColor = other.bgColor;
+    isBorder = other.isBorder;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Cell &&
+        other.char == char &&
+        other.fgColor == fgColor &&
+        other.bgColor == bgColor &&
+        other.isBorder == isBorder;
+  }
+
+  @override
+  int get hashCode => Object.hash(char, fgColor, bgColor, isBorder);
 }
 
 class Canvas {
   final int width;
   final int height;
-  final List<List<Cell>> _buffer;
+  final List<List<Cell>> _backBuffer;
+  final List<List<Cell>> _frontBuffer;
 
   // Clipping state
   final List<Rect> _clipStack = [];
@@ -30,7 +51,11 @@ class Canvas {
   Canvas(Size size)
     : width = size.width,
       height = size.height,
-      _buffer = List.generate(
+      _backBuffer = List.generate(
+        size.height,
+        (_) => List.generate(size.width, (_) => Cell.empty()),
+      ),
+      _frontBuffer = List.generate(
         size.height,
         (_) => List.generate(size.width, (_) => Cell.empty()),
       );
@@ -47,6 +72,15 @@ class Canvas {
     if (_clipStack.isNotEmpty) {
       _clipStack.removeLast();
     }
+  }
+
+  void clear() {
+    for (var row in _backBuffer) {
+      for (var cell in row) {
+        cell.reset();
+      }
+    }
+    _clipStack.clear();
   }
 
   void clipRect(Rect rect) {
@@ -110,7 +144,7 @@ class Canvas {
       if (!_clipStack.last.contains(Offset(x, y))) return;
     }
 
-    final cell = _buffer[y][x];
+    final cell = _backBuffer[y][x];
 
     if (isBorder && cell.isBorder) {
       // Merge logic
@@ -164,26 +198,86 @@ class Canvas {
     }
   }
 
-  /// Renders the canvas to a string for standard output.
-  /// Optimized to minimize escape codes? Maybe later.
-  /// For now just simple dump.
-  String render() {
+  /// Calculates the difference between the back buffer and the front buffer,
+  /// generates optimized ANSI sequences for the updates, and swaps the buffers.
+  ///
+  /// This implements:
+  /// 1. Double Buffering & Diffing: Only changed cells are drawn.
+  /// 2. Style Optimization: ANSI codes are only emitted when style changes.
+  /// 3. Cursor Optimization: Moves cursor only when necessary.
+  String diff() {
     final buffer = StringBuffer();
-    // Move to top-left
-    buffer.write(Ansi.home);
+    // buffer.write(Ansi.hideCursor); // Ensure cursor is hidden during update
 
-    // We can also just join lines.
-    // Assuming we're in raw mode or alternate buffer, we probably want to assume 0,0 is start.
+    Color? currentFg;
+    Color? currentBg;
+    int? currentRow;
+    int? currentCol;
 
-    for (int r = 0; r < height; r++) {
-      for (int c = 0; c < width; c++) {
-        final cell = _buffer[r][c];
-        buffer.write(Ansi.color(cell.char, fg: cell.fgColor, bg: cell.bgColor));
+    // Helper to emit style change if needed
+    void updateStyle(Color? fg, Color? bg) {
+      if (fg != currentFg) {
+        if (fg == null) {
+          // If we need to clear FG, we might need reset.
+          // Simple approach: Reset all and re-apply BG if needed.
+          // Or use default color code if available (39 for FG).
+          // For now, let's use full reset if either is null, which is safer but verbose.
+          // Optimized: Use specific codes if possible.
+          buffer.write('\x1b[39m'); // Default FG
+        } else {
+          buffer.write(fg.ansiFg);
+        }
+        currentFg = fg;
       }
-      if (r < height - 1) {
-        buffer.write('\r\n');
+      if (bg != currentBg) {
+        if (bg == null) {
+          buffer.write('\x1b[49m'); // Default BG
+        } else {
+          buffer.write(bg.ansiBg);
+        }
+        currentBg = bg;
       }
     }
+
+    // Force style reset at start of batch if we don't track persistent terminal state
+    // buffer.write(Ansi.reset);
+    // currentFg = null;
+    // currentBg = null;
+
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++) {
+        final back = _backBuffer[y][x];
+        final front = _frontBuffer[y][x];
+
+        if (back != front) {
+          // Cell changed
+          // Move cursor if not sequential
+          if (currentRow != y || currentCol != x) {
+            // Optimization: If it's just next char, no need to move (implicit)
+            // But here we are iterating. If x == currentCol + 1, it's sequential.
+            // But we only update if changed.
+            // If we skipped some chars (because they were identical), we MUST move.
+            buffer.write(Ansi.moveTo(y + 1, x + 1));
+          }
+
+          updateStyle(back.fgColor, back.bgColor);
+          buffer.write(back.char);
+
+          // Update state
+          currentRow = y;
+          currentCol = x + 1;
+
+          // Sync front buffer
+          front.copyFrom(back);
+        }
+      }
+    }
+    
+    // Reset styles at the end to be safe?
+    if (currentFg != null || currentBg != null) {
+      buffer.write(Ansi.reset);
+    }
+
     return buffer.toString();
   }
 }
