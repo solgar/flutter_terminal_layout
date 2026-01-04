@@ -520,6 +520,10 @@ class TerminalApp {
     _exitCompleter = Completer<void>();
     _terminal.enableRawMode();
 
+    final logFile = File('render.log');
+    final logSink = logFile.openWrite(mode: FileMode.write);
+    logSink.writeln('--- Started Session ${DateTime.now()} ---');
+
     stdout.write(Ansi.hideCursor);
     stdout.write(Ansi.enableAltBuffer);
     stdout.write(Ansi.enableMouse);
@@ -528,6 +532,9 @@ class TerminalApp {
     void restoreTerminal() {
       if (isRestored) return;
       isRestored = true;
+
+      logSink.writeln('--- Finished Session ${DateTime.now()} ---');
+      logSink.close();
 
       // 1. Disable raw mode
       try {
@@ -555,6 +562,7 @@ class TerminalApp {
       Canvas? canvas;
 
       void draw() {
+        final startTime = DateTime.now().microsecondsSinceEpoch;
         isFrameScheduled = false;
         lastFrameTime = DateTime.now().millisecondsSinceEpoch;
         // Build dirty elements
@@ -574,11 +582,7 @@ class TerminalApp {
           // Resize canvas if needed
           if (canvas == null || canvas!.width != width || canvas!.height != height) {
             canvas = Canvas(Size(width, height));
-            // Force full repaint on resize?
-            // The new canvas starts empty. The first diff will likely redraw everything 
-            // if front buffer is empty/default.
-            // Actually, a new Canvas has empty front buffer.
-            // If we just resized, we probably want to clear screen first?
+            // Force full repaint on resize
             _terminal.write(Ansi.clearScreen); 
           } else {
              // Clear back buffer for new frame
@@ -589,7 +593,19 @@ class TerminalApp {
 
           rootRenderObject.paint(canvas!, Offset.zero);
 
-          _terminal.write(canvas!.diff());
+          final output = canvas!.diff();
+          _terminal.write(output);
+
+          final endTime = DateTime.now().microsecondsSinceEpoch;
+          final stats = canvas!.lastStats;
+          if (stats != null) {
+            final double dt = (endTime - startTime) / 1000.0;
+            logSink.writeln(
+              'Frame: ${stats.changedCells}/${stats.totalCells} cells changed, '
+              '${stats.bytes} bytes, '
+              '${dt.toStringAsFixed(2)}ms',
+            );
+          }
         }
       }
 

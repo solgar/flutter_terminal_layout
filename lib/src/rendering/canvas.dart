@@ -39,11 +39,24 @@ class Cell {
   int get hashCode => Object.hash(char, fgColor, bgColor, isBorder);
 }
 
+class CanvasStats {
+  final int changedCells;
+  final int totalCells;
+  final int bytes;
+  CanvasStats({
+    required this.changedCells,
+    required this.totalCells,
+    required this.bytes,
+  });
+}
+
 class Canvas {
   final int width;
   final int height;
   final List<List<Cell>> _backBuffer;
   final List<List<Cell>> _frontBuffer;
+
+  CanvasStats? lastStats;
 
   // Clipping state
   final List<Rect> _clipStack = [];
@@ -244,12 +257,15 @@ class Canvas {
     // currentFg = null;
     // currentBg = null;
 
+    int changedCells = 0;
+
     for (int y = 0; y < height; y++) {
       for (int x = 0; x < width; x++) {
         final back = _backBuffer[y][x];
         final front = _frontBuffer[y][x];
 
         if (back != front) {
+          changedCells++;
           // Cell changed
           // Move cursor if not sequential
           if (currentRow != y || currentCol != x) {
@@ -278,6 +294,13 @@ class Canvas {
       buffer.write(Ansi.reset);
     }
 
-    return buffer.toString();
+    final output = buffer.toString();
+    lastStats = CanvasStats(
+      changedCells: changedCells,
+      totalCells: width * height,
+      bytes: output.length,
+    );
+
+    return output;
   }
 }
