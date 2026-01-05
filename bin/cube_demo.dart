@@ -20,6 +20,7 @@ class _CubeAppState extends State<CubeApp> {
   double _angleX = 0;
   double _angleY = 0;
   double _angleZ = 0;
+  double _scaleFactor = 1.0;
   late Timer _timer;
 
   @override
@@ -40,23 +41,43 @@ class _CubeAppState extends State<CubeApp> {
     super.dispose();
   }
 
+  void _handleKey(List<int> input) {
+    if (input.contains(Keys.plus) || input.contains(Keys.equals)) {
+      setState(() {
+        _scaleFactor += 0.1;
+      });
+    } else if (input.contains(Keys.minus) || input.contains(Keys.underscore)) {
+      setState(() {
+        _scaleFactor = math.max(0.1, _scaleFactor - 0.1);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        CubeWidget(angleX: _angleX, angleY: _angleY, angleZ: _angleZ),
-        Positioned(
-          bottom: 0,
-          left: 0,
-          child: Container(
-            color: Colors.black,
-            child: Text(
-              ' High-Res Z-Buffered Cube (Half-Block) ',
-              color: Colors.white,
+    return KeyboardListener(
+      onKeyEvent: _handleKey,
+      child: Stack(
+        children: [
+          CubeWidget(
+            angleX: _angleX,
+            angleY: _angleY,
+            angleZ: _angleZ,
+            scaleFactor: _scaleFactor,
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            child: Container(
+              color: Colors.black,
+              child: Text(
+                ' High-Res Z-Buffered Cube. +/- to Zoom. ESC to exit. ',
+                color: Colors.white,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -65,12 +86,14 @@ class CubeWidget extends RenderObjectWidget {
   final double angleX;
   final double angleY;
   final double angleZ;
+  final double scaleFactor;
 
   const CubeWidget({
     super.key,
     required this.angleX,
     required this.angleY,
     required this.angleZ,
+    this.scaleFactor = 1.0,
   });
 
   @override
@@ -78,7 +101,12 @@ class CubeWidget extends RenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return RenderCube(angleX: angleX, angleY: angleY, angleZ: angleZ);
+    return RenderCube(
+      angleX: angleX,
+      angleY: angleY,
+      angleZ: angleZ,
+      scaleFactor: scaleFactor,
+    );
   }
 
   @override
@@ -86,7 +114,8 @@ class CubeWidget extends RenderObjectWidget {
     renderObject
       ..angleX = angleX
       ..angleY = angleY
-      ..angleZ = angleZ;
+      ..angleZ = angleZ
+      ..scaleFactor = scaleFactor;
   }
 }
 
@@ -94,11 +123,13 @@ class RenderCube extends RenderObject {
   double angleX;
   double angleY;
   double angleZ;
+  double scaleFactor;
 
   RenderCube({
     required this.angleX,
     required this.angleY,
     required this.angleZ,
+    this.scaleFactor = 1.0,
   });
 
   @override
@@ -137,7 +168,7 @@ class RenderCube extends RenderObject {
     // Scale: The terminal cell is approx 1:2. 
     // In our 2x vertical buffer, pixels are approx 1:1.
     // So we can use uniform scaling.
-    final scale = math.min(w, h) / 3.5;
+    final scale = (math.min(w, h) / 3.5) * scaleFactor;
 
     final vertices = [
       Vector3(-1, -1, -1), Vector3(1, -1, -1), Vector3(1, 1, -1), Vector3(-1, 1, -1),
@@ -194,26 +225,13 @@ class RenderCube extends RenderObject {
       final v2 = transformed[indices[i+2]];
 
       // Face Normal (Flat shading)
-      // We need to use rotated (but unprojected) vertices for true normal?
-      // Or just use screen space cross product for z?
-      // Ideally we transform normals properly. 
-      // But for a simple cube, we can compute normal from screen space triangle for "lighting"?
-      // No, that's wrong. Lighting should be computed in 3D space.
-      // But we lost the 3D rotated coordinates (overwrote with projected).
-      // Let's re-calculate normal from indices (Cube faces are axis aligned originally).
-      // Or better: Compute normal from the 3 edges of the triangle in 3D space.
-      // Simpler hack: Compute Cross product of screen space edges to check winding (Backface culling).
-      
+      // Check winding (Backface culling)
       final edge1 = v1 - v0;
       final edge2 = v2 - v0;
       final normalZ = edge1.x * edge2.y - edge1.y * edge2.x;
 
       if (normalZ >= 0) continue; // Backface culling (assuming CCW is front)
 
-      // Lighting: We need 3D normal. 
-      // Since I didn't save the rotated 3D verts, I'll cheat/approximate or re-do.
-      // Re-doing correctly: We really should have kept rotated 3D verts.
-      // BUT, since it's a cube, flat shading is distinct per face.
       // Let's assign colors based on Face ID (i/6).
       int faceId = i ~/ 6;
       Color faceColor;
@@ -227,18 +245,6 @@ class RenderCube extends RenderObject {
         const Color.fromARGB(255, 100, 255, 255), // Top (Cyan-ish)
         const Color.fromARGB(255, 255, 100, 255), // Bottom (Magenta-ish)
       ];
-      
-      // Calculate simple diffuse intensity based on a fixed light relative to face index?
-      // No, that won't rotate with the cube.
-      // We need the normal. 
-      // Let's recover the normal from the triangle cross product in 3D (approximate with Z depth?)
-      // Actually, since we have the indices, we know the original normal.
-      // We just need to rotate that original normal by the current rotation matrix.
-      // Or... simpler: Just use the screen-space normalZ as an "intensity" approximation?
-      // No, that's view-dependent, not light-dependent.
-      
-      // Let's just use the Colors above. It will look like a colorful cube.
-      // To add shading, we can modulate the color by some factor.
       
       faceColor = baseColors[faceId];
       
@@ -283,11 +289,6 @@ class RenderCube extends RenderObject {
     maxY = math.min(_bufferHeight - 1, maxY);
 
     // Edge functions
-    // P = (x,y)
-    // w0 = edge(v1, v2, P)
-    // w1 = edge(v2, v0, P)
-    // w2 = edge(v0, v1, P)
-    
     // Constant setup
     // Area is effectively the edge function of edge v1-v2 evaluated at v0
     // w0 for v0 should be area.
