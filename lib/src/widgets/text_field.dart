@@ -54,58 +54,50 @@ class _TextFieldState extends State<TextField> {
       int i = 0;
       bool changed = false;
       while (i < chars.length) {
-        final char = chars[i];
+        // Try to match multi-byte sequences first
+        final remaining = chars.sublist(i);
 
-        if (char == Keys.esc) {
-          // ANSI Sequence?
-          if (i + 2 < chars.length && chars[i + 1] == Keys.bracket) {
-            final code = chars[i + 2];
-            if (code == Keys.arrowUp) { // Up
-              _moveVertical(-1);
-              i += 3;
-              continue;
-            } else if (code == Keys.arrowDown) { // Down
-              _moveVertical(1);
-              i += 3;
-              continue;
-            } else if (code == Keys.arrowRight) { // Right
-              if (_controller.selectionIndex < _controller.text.length) {
-                _controller.selectionIndex++;
-              }
-              i += 3;
-              continue;
-            } else if (code == Keys.arrowLeft) { // Left
-              if (_controller.selectionIndex > 0) {
-                _controller.selectionIndex--;
-              }
-              i += 3;
-              continue;
-            } else if (code == Keys.delete &&
-                i + 3 < chars.length &&
-                chars[i + 3] == Keys.tilde) {
-              // Delete (ESC [ 3 ~)
-              if (_controller.selectionIndex < _controller.text.length) {
-                var newText = _controller.text.substring(
-                      0,
-                      _controller.selectionIndex,
-                    ) +
-                    _controller.text.substring(_controller.selectionIndex + 1);
-                _controller.text = newText;
-                changed = true;
-              }
-              i += 4;
-              continue;
-            } else if ((code == Keys.pageUp || code == Keys.pageDown) &&
-                i + 3 < chars.length &&
-                chars[i + 3] == Keys.tilde) {
-              // Page Up (5) / Page Down (6) - Ignore
-              i += 4;
-              continue;
-            }
+        if (Keys.isArrowUp(remaining)) {
+          _moveVertical(-1);
+          i += 3;
+          continue;
+        } else if (Keys.isArrowDown(remaining)) {
+          _moveVertical(1);
+          i += 3;
+          continue;
+        } else if (Keys.isArrowRight(remaining)) {
+          if (_controller.selectionIndex < _controller.text.length) {
+            _controller.selectionIndex++;
           }
+          i += 3;
+          continue;
+        } else if (Keys.isArrowLeft(remaining)) {
+          if (_controller.selectionIndex > 0) {
+            _controller.selectionIndex--;
+          }
+          i += 3;
+          continue;
+        } else if (Keys.isDelete(remaining)) {
+          if (_controller.selectionIndex < _controller.text.length) {
+            var newText = _controller.text.substring(
+                  0,
+                  _controller.selectionIndex,
+                ) +
+                _controller.text.substring(_controller.selectionIndex + 1);
+            _controller.text = newText;
+            changed = true;
+          }
+          i += 4;
+          continue;
+        } else if (Keys.isPageUp(remaining) || Keys.isPageDown(remaining)) {
+          i += 4;
+          continue;
         }
 
-        if (char == Keys.backspace) {
+        final char = chars[i];
+        final singleCharList = [char];
+
+        if (Keys.isBackspace(singleCharList)) {
           // Backspace
           if (_controller.text.isNotEmpty && _controller.selectionIndex > 0) {
             var newText =
@@ -115,7 +107,7 @@ class _TextFieldState extends State<TextField> {
             _controller.selectionIndex--;
             changed = true;
           }
-        } else if (char == Keys.enter || char == Keys.newline) {
+        } else if (Keys.isEnter(singleCharList)) {
           // Enter
           widget.onSubmitted?.call(_controller.text);
         } else if (char >= 32 && char <= 126) {
@@ -158,7 +150,7 @@ class _TextFieldState extends State<TextField> {
     }
 
     int targetVisualIndex = targetRow * width + col;
-    
+
     // Clamp to valid range relative to text
     // We want the cursor to stay on the text part.
     // Minimum visual index is prefixLen (start of text).

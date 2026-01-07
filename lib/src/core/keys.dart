@@ -177,6 +177,92 @@ class Keys {
   
   static const int pageUp = 53; // '5'
   static const int pageDown = 54; // '6'
+
+  /// Checks if the input sequence matches a Page Up event.
+  /// Sequence: ESC [ 5 ~
+  static bool isPageUp(List<int> chars) {
+    return chars.length == 4 &&
+        chars[0] == esc &&
+        chars[1] == bracket &&
+        chars[2] == pageUp &&
+        chars[3] == tilde;
+  }
+
+  /// Checks if the input sequence matches a Page Down event.
+  /// Sequence: ESC [ 6 ~
+  static bool isPageDown(List<int> chars) {
+    return chars.length == 4 &&
+        chars[0] == esc &&
+        chars[1] == bracket &&
+        chars[2] == pageDown &&
+        chars[3] == tilde;
+  }
+
+  /// Checks if the input sequence matches an Arrow Up event.
+  /// Sequence: ESC [ A
+  static bool isArrowUp(List<int> chars) {
+    return chars.length == 3 &&
+        chars[0] == esc &&
+        chars[1] == bracket &&
+        chars[2] == arrowUp;
+  }
+
+  /// Checks if the input sequence matches an Arrow Down event.
+  /// Sequence: ESC [ B
+  static bool isArrowDown(List<int> chars) {
+    return chars.length == 3 &&
+        chars[0] == esc &&
+        chars[1] == bracket &&
+        chars[2] == arrowDown;
+  }
+
+  /// Checks if the input sequence matches an Arrow Right event.
+  /// Sequence: ESC [ C
+  static bool isArrowRight(List<int> chars) {
+    return chars.length == 3 &&
+        chars[0] == esc &&
+        chars[1] == bracket &&
+        chars[2] == arrowRight;
+  }
+
+  /// Checks if the input sequence matches an Arrow Left event.
+  /// Sequence: ESC [ D
+  static bool isArrowLeft(List<int> chars) {
+    return chars.length == 3 &&
+        chars[0] == esc &&
+        chars[1] == bracket &&
+        chars[2] == arrowLeft;
+  }
+
+  /// Checks if the input sequence matches a Delete event.
+  /// Sequence: ESC [ 3 ~
+  static bool isDelete(List<int> chars) {
+    return chars.length == 4 &&
+        chars[0] == esc &&
+        chars[1] == bracket &&
+        chars[2] == delete &&
+        chars[3] == tilde;
+  }
+
+  /// Checks if the input sequence matches an Enter or Newline event.
+  static bool isEnter(List<int> chars) {
+    return chars.length == 1 && (chars[0] == enter || chars[0] == newline);
+  }
+
+  /// Checks if the input sequence matches a Backspace event.
+  static bool isBackspace(List<int> chars) {
+    return chars.length == 1 && chars[0] == backspace;
+  }
+
+  /// Checks if the input sequence matches a Tab event.
+  static bool isTab(List<int> chars) {
+    return chars.length == 1 && chars[0] == tab;
+  }
+
+  /// Checks if the input sequence matches an Escape event.
+  static bool isEscape(List<int> chars) {
+    return chars.length == 1 && chars[0] == esc;
+  }
 }
 
 /// Mouse button codes extracted from SGR mouse events.

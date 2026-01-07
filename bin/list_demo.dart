@@ -44,19 +44,11 @@ class _ListDemoAppState extends State<ListDemoApp> {
   Widget _buildListSection() => KeyboardListener(
     onKeyEvent: (input) {
       // j (106) or Down (ESC [ B -> 27, 91, 66)
-      if (input.contains(Keys.j) ||
-          (input.length >= 3 &&
-              input[0] == Keys.esc &&
-              input[1] == Keys.bracket &&
-              input[2] == Keys.arrowDown)) {
+      if (input.contains(Keys.j) || Keys.isArrowDown(input)) {
         _scroll(1);
       }
       // k (107) or Up (ESC [ A -> 27, 91, 65)
-      else if (input.contains(Keys.k) ||
-          (input.length >= 3 &&
-              input[0] == Keys.esc &&
-              input[1] == Keys.bracket &&
-              input[2] == Keys.arrowUp)) {
+      else if (input.contains(Keys.k) || Keys.isArrowUp(input)) {
         _scroll(-1);
       }
     },
