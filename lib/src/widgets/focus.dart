@@ -12,7 +12,8 @@ class FocusNode {
        _canRequestFocus = canRequestFocus;
 
   final String? debugLabel;
-  final bool Function(FocusNode node, KeyEvent event)? onKey;
+  // Made mutable to allow Focus widget to update it
+  bool Function(FocusNode node, KeyEvent event)? onKey;
 
   bool _skipTraversal;
   bool get skipTraversal => _skipTraversal;
@@ -35,10 +36,8 @@ class FocusNode {
   }
 
   FocusManager? _manager;
-  /*
-  FocusScopeNode? _parent;
+  FocusNode? _parent;
   final List<FocusNode> _children = [];
-  */
 
   bool get hasFocus => _manager?.primaryFocus == this;
 
@@ -54,21 +53,21 @@ class FocusNode {
     }
   }
 
-  /*
-  void _notify() {
-    // Notify listeners (ChangeNotifier logic if we add it)
+  void _reparent(FocusNode? newParent) {
+    if (_parent == newParent) return;
+    _parent?._children.remove(this);
+    _parent = newParent;
+    _parent?._children.add(this);
+    // Inherit manager from parent if not set?
+    if (newParent != null && newParent._manager != null) {
+      _manager = newParent._manager;
+    }
   }
-  */
-
-  // Attachment logic
-  /*
-  BuildContext? _context;
-  */
-  void attach(BuildContext context, {FocusOnKeyCallback? onKey}) {
-    /* _context = context; */
-    // Auto-register with manager if found in context?
-    // For now we rely on explicit hierarchy or manual registration?
-    // Flutter uses Focus widget to attach logic.
+  
+  // Clean up
+  void dispose() {
+    _parent?._children.remove(this);
+    if (hasFocus) unfocus();
   }
 }
 
@@ -81,14 +80,6 @@ class FocusScopeNode extends FocusNode {
     super.skipTraversal,
     super.canRequestFocus,
   });
-
-  /*
-  FocusNode? _focusedChild;
-
-  void _setFocusedChild(FocusNode? child) {
-    _focusedChild = child;
-  }
-  */
 }
 
 class FocusManager {
@@ -98,34 +89,37 @@ class FocusManager {
   FocusNode? _primaryFocus;
   FocusNode? get primaryFocus => _primaryFocus;
 
-  /*
-  final List<FocusNode> _dirtyNodes = [];
-  */
-
   void _setPrimaryFocus(FocusNode? node) {
     if (_primaryFocus == node) return;
-    // final previous = _primaryFocus;
     _primaryFocus = node;
-
-    // Notify changes
-    // previous?._notify();
-    // node?._notify();
   }
 
-  void _markNeedsUpdate() {
-    // schedule microtask?
-  }
+  void _markNeedsUpdate() {}
 
-  // Input dispatch
+  // Input dispatch with bubbling
   bool handleKey(KeyEvent event) {
-    if (_primaryFocus != null) {
-      // Walk up the tree?
-      // For now just dispatch to primary
-      if (_primaryFocus!.onKey?.call(_primaryFocus!, event) == true) {
+    FocusNode? current = _primaryFocus;
+    while (current != null) {
+      if (current.onKey?.call(current, event) == true) {
         return true;
       }
+      current = current._parent;
     }
     return false;
+  }
+}
+
+class _FocusInheritedWidget extends InheritedWidget {
+  final FocusNode node;
+
+  const _FocusInheritedWidget({
+    required this.node,
+    required super.child,
+  });
+
+  @override
+  bool updateShouldNotify(_FocusInheritedWidget oldWidget) {
+    return node != oldWidget.node;
   }
 }
 
@@ -145,6 +139,12 @@ class Focus extends StatefulWidget {
     this.onKey,
   });
 
+  static FocusNode? of(BuildContext context) {
+    final _FocusInheritedWidget? inherited = context
+        .dependOnInheritedWidgetOfExactType<_FocusInheritedWidget>();
+    return inherited?.node;
+  }
+
   @override
   State<Focus> createState() => _FocusState();
 }
@@ -157,23 +157,52 @@ class _FocusState extends State<Focus> {
   void initState() {
     super.initState();
     _node = widget.focusNode ?? FocusNode();
-    _node._manager = FocusManager.instance; // Simplified attachment
+    _node._manager = FocusManager.instance;
+    // Sync onKey
+    if (widget.onKey != null) {
+      _node.onKey = widget.onKey;
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final parentNode = Focus.of(context);
+    _node._reparent(parentNode);
+    
     if (widget.autofocus && !_didAutofocus) {
       _didAutofocus = true;
       _node.requestFocus();
+    }
+  }
+  
+  @override
+  void didUpdateWidget(Focus oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.focusNode != oldWidget.focusNode) {
+       // Handle node replacement if needed (complex)
+    }
+    if (widget.onKey != null) {
+      _node.onKey = widget.onKey;
     }
   }
 
   @override
   void dispose() {
     if (widget.focusNode == null) {
-      // Dipose internal node
+      _node.dispose();
+    } else {
+      // If node was external, just detach from tree, don't dispose
+      _node._reparent(null);
     }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return widget.child;
+    return _FocusInheritedWidget(
+      node: _node,
+      child: widget.child,
+    );
   }
 }

@@ -230,6 +230,12 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
+  void _firstBuild() {
+    _state.didChangeDependencies();
+    super._firstBuild();
+  }
+
+  @override
   void unmount() {
     _state.dispose();
     _state._mounted = false;
@@ -461,12 +467,19 @@ class InheritedElement extends ProxyElement {
 
   @override
   void mount(Element? parent) {
+    // Mimic Element.mount(parent)
+    _parent = parent;
     final parentWidgets = parent?._inheritedWidgets;
+    
+    // Update _inheritedWidgets for this element and its descendants
     _inheritedWidgets = parentWidgets == null
         ? {}
         : Map<Type, InheritedElement>.from(parentWidgets);
     _inheritedWidgets![widget.runtimeType] = this;
-    super.mount(parent);
+    
+    // Mimic ComponentElement.mount tail (super.mount called Element.mount, then _firstBuild)
+    // Since we skipped super.mount, we must call _firstBuild ourselves.
+    _firstBuild();
   }
 
   @override

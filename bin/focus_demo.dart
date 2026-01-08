@@ -71,10 +71,13 @@ class _FocusDemoState extends State<FocusDemo> {
     // Note: In real app, we would listen to node changes.
     // Here we rely on parent setState to rebuild us.
     final bool isFocused = node.hasFocus;
-    return Container(
-      color: isFocused ? Colors.blue : Colors.white,
-      alignment: Alignment.center,
-      child: Text(label, color: isFocused ? Colors.white : Colors.black),
+    return Focus(
+      focusNode: node,
+      child: Container(
+        color: isFocused ? Colors.blue : Colors.white,
+        alignment: Alignment.center,
+        child: Text(label, color: isFocused ? Colors.white : Colors.black),
+      ),
     );
   }
 }
