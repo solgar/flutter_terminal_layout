@@ -195,6 +195,7 @@ class _ClaudeCodeAppState extends State<ClaudeCodeApp> {
               padding: EdgeInsets.all(1),
               child: TextField(
                 controller: _textController,
+                autofocus: true,
                 decorationPrefix: '> ',
                 placeholder: 'Try "how does <filepath> work?"',
                 onSubmitted: _handleSubmit,

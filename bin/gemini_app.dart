@@ -79,7 +79,10 @@ class _GeminiAppState extends State<GeminiApp> {
         // 4. Input Box
         Container(
           decoration: BoxDecoration(
-            border: BoxBorder.all(color: Colors.blue, style: BorderStyle.rounded),
+            border: BoxBorder.all(
+              color: Colors.blue,
+              style: BorderStyle.rounded,
+            ),
           ),
           alignment: Alignment.center,
           padding: EdgeInsets.all(1),
@@ -87,6 +90,7 @@ class _GeminiAppState extends State<GeminiApp> {
             children: [
               Expanded(
                 child: TextField(
+                  autofocus: true,
                   controller: TextEditingController(
                     text:
                         'Can you find and download the style guide that Google uses for JS? Save it in this projec',
