@@ -35,11 +35,27 @@ class FocusNode {
     }
   }
 
+  final List<void Function()> _listeners = [];
+
+  void addListener(void Function() listener) {
+    _listeners.add(listener);
+  }
+
+  void removeListener(void Function() listener) {
+    _listeners.remove(listener);
+  }
+
+  void notifyListeners() {
+    for (final listener in List.of(_listeners)) {
+      listener();
+    }
+  }
+
   FocusManager? _manager;
   FocusNode? _parent;
   final List<FocusNode> _children = [];
 
-  bool get hasFocus => _manager?.primaryFocus == this;
+  bool get hasFocus => FocusManager.instance.primaryFocus == this;
 
   void requestFocus() {
     if (canRequestFocus) {
@@ -91,7 +107,10 @@ class FocusManager {
 
   void _setPrimaryFocus(FocusNode? node) {
     if (_primaryFocus == node) return;
+    final previous = _primaryFocus;
     _primaryFocus = node;
+    previous?.notifyListeners();
+    _primaryFocus?.notifyListeners();
   }
 
   void _markNeedsUpdate() {}

@@ -10,6 +10,7 @@ import 'layout_demo.dart';
 import 'list_demo.dart';
 import 'loading_demo.dart';
 import 'mouse_app.dart';
+import 'text_field_demo.dart';
 
 void main() {
   runApp(const MainDemoApp());
@@ -25,12 +26,14 @@ class MainDemoApp extends StatefulWidget {
 class _MainDemoAppState extends State<MainDemoApp> {
   int _selectedIndex = 0;
   Widget? _activeDemo;
+  late FocusNode _rootNode;
 
   late final List<MapEntry<String, Widget Function()>> _demos;
 
   @override
   void initState() {
     super.initState();
+    _rootNode = FocusNode(debugLabel: 'Main Menu');
     _demos = [
       MapEntry('Border Demo', () => const BorderDemo()),
       MapEntry('Claude Code', () => const ClaudeCodeApp()),
@@ -42,22 +45,31 @@ class _MainDemoAppState extends State<MainDemoApp> {
       MapEntry('List Demo', () => const ListDemoApp()),
       MapEntry('Loading Demo', () => const LoadingDemo()),
       MapEntry('Mouse Demo', () => const MouseApp()),
+      MapEntry('TextField Demo', () => const TextFieldDemo()),
     ];
   }
 
-  void _handleInput(List<int> bytes) {
+  @override
+  void dispose() {
+    _rootNode.dispose();
+    super.dispose();
+  }
+
+  bool _handleInput(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return false;
+    final bytes = event.bytes;
+
     if (_activeDemo != null) {
-      // Check for Escape to go back
+      // Check for Escape to go back (if bubbled up)
       if (Keys.isEscape(bytes)) {
         setState(() {
           _activeDemo = null;
+          // Re-focus menu when returning
+          _rootNode.requestFocus();
         });
-        // We prevent bubbling/other logic?
-        // KeyboardListener doesn't stop propagation in this implementation.
-        // It's a passive listener.
-        // But since we setState to null, the demo is unmounted immediately.
+        return true;
       }
-      return;
+      return false; // Let active demo handle it (if it has focus logic)
     }
 
     // Menu Navigation
@@ -66,32 +78,38 @@ class _MainDemoAppState extends State<MainDemoApp> {
       setState(() {
         _selectedIndex = (_selectedIndex - 1 + _demos.length) % _demos.length;
       });
+      return true;
     } else if (Keys.isArrowDown(bytes)) {
       // Down
       setState(() {
         _selectedIndex = (_selectedIndex + 1) % _demos.length;
       });
+      return true;
     } else if (Keys.isEnter(bytes)) {
       // Enter
       setState(() {
         _activeDemo = _demos[_selectedIndex].value();
       });
+      return true;
     } else if (bytes.length == 1 && bytes[0] == Keys.q) {
       // 'q'
       TerminalApp.instance.stop();
+      return true;
     }
+    return false;
   }
 
   @override
   Widget build(BuildContext context) {
+    // If demo is active, we just show it. 
+    // It should manage its own focus or bubble up keys to us via parent Focus.
+    // We wrap everything in a Root Focus to catch bubbled keys.
+    
+    Widget content;
     if (_activeDemo != null) {
-      // We wrap with KeyboardListener to capture Escape even if demo uses input
-      return KeyboardListener(onKeyEvent: _handleInput, child: _activeDemo!);
-    }
-
-    return KeyboardListener(
-      onKeyEvent: _handleInput,
-      child: Container(
+      content = _activeDemo!;
+    } else {
+      content = Container(
         color: Colors.black,
         alignment: Alignment.center,
         child: Container(
@@ -129,7 +147,14 @@ class _MainDemoAppState extends State<MainDemoApp> {
             ],
           ),
         ),
-      ),
+      );
+    }
+
+    return Focus(
+      focusNode: _rootNode,
+      autofocus: true, // Focus menu on start
+      onKey: _handleInput,
+      child: content,
     );
   }
 }

@@ -1,8 +1,9 @@
 import 'framework.dart';
 import 'widget.dart';
-import 'keyboard_listener.dart';
+import 'focus.dart'; // Replaces keyboard_listener.dart
 import '../core/ansi.dart';
 import '../core/keys.dart';
+import '../core/events.dart'; // Added for KeyEvent
 import 'rich_text.dart';
 
 typedef ValueChanged<T> = void Function(T value);
@@ -21,6 +22,8 @@ class TextEditingController {
 
 class TextField extends StatefulWidget {
   final TextEditingController? controller;
+  final FocusNode? focusNode;
+  final bool autofocus;
   final ValueChanged<String>? onSubmitted;
   final ValueChanged<String>? onChanged;
   final String? decorationPrefix; // e.g. "> "
@@ -29,6 +32,8 @@ class TextField extends StatefulWidget {
   const TextField({
     super.key,
     this.controller,
+    this.focusNode,
+    this.autofocus = false,
     this.onSubmitted,
     this.onChanged,
     this.decorationPrefix,
@@ -41,15 +46,34 @@ class TextField extends StatefulWidget {
 
 class _TextFieldState extends State<TextField> {
   late TextEditingController _controller;
-  // bool _hasFocus = true; // Unused for now
+  late FocusNode _focusNode;
 
   @override
   void initState() {
     super.initState();
     _controller = widget.controller ?? TextEditingController();
+    _focusNode = widget.focusNode ?? FocusNode();
+    _focusNode.addListener(_handleFocusChange);
   }
 
-  void _handleKeyEvent(List<int> chars) {
+  void _handleFocusChange() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _focusNode.removeListener(_handleFocusChange);
+    if (widget.focusNode == null) {
+      _focusNode.dispose();
+    }
+    super.dispose();
+  }
+
+  bool _handleKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return false;
+    final chars = event.bytes;
+    bool handled = false;
+
     setState(() {
       int i = 0;
       bool changed = false;
@@ -60,22 +84,26 @@ class _TextFieldState extends State<TextField> {
         if (Keys.isArrowUp(remaining)) {
           _moveVertical(-1);
           i += 3;
+          handled = true;
           continue;
         } else if (Keys.isArrowDown(remaining)) {
           _moveVertical(1);
           i += 3;
+          handled = true;
           continue;
         } else if (Keys.isArrowRight(remaining)) {
           if (_controller.selectionIndex < _controller.text.length) {
             _controller.selectionIndex++;
           }
           i += 3;
+          handled = true;
           continue;
         } else if (Keys.isArrowLeft(remaining)) {
           if (_controller.selectionIndex > 0) {
             _controller.selectionIndex--;
           }
           i += 3;
+          handled = true;
           continue;
         } else if (Keys.isDelete(remaining)) {
           if (_controller.selectionIndex < _controller.text.length) {
@@ -88,9 +116,11 @@ class _TextFieldState extends State<TextField> {
             changed = true;
           }
           i += 4;
+          handled = true;
           continue;
         } else if (Keys.isPageUp(remaining) || Keys.isPageDown(remaining)) {
           i += 4;
+          handled = true; // Consume but ignore
           continue;
         }
 
@@ -107,9 +137,11 @@ class _TextFieldState extends State<TextField> {
             _controller.selectionIndex--;
             changed = true;
           }
+          handled = true;
         } else if (Keys.isEnter(singleCharList)) {
           // Enter
           widget.onSubmitted?.call(_controller.text);
+          handled = true;
         } else if (char >= 32 && char <= 126) {
           // Printable ASCII
           var newText =
@@ -119,6 +151,7 @@ class _TextFieldState extends State<TextField> {
           _controller.text = newText;
           _controller.selectionIndex++;
           changed = true;
+          handled = true;
         }
         i++;
       }
@@ -126,6 +159,7 @@ class _TextFieldState extends State<TextField> {
         widget.onChanged?.call(_controller.text);
       }
     });
+    return handled;
   }
 
   void _moveVertical(int dir) {
@@ -193,21 +227,27 @@ class _TextFieldState extends State<TextField> {
       spans.add(TextSpan(text: widget.decorationPrefix!, color: Colors.white));
     }
     spans.add(TextSpan(text: before, color: Colors.white));
-    spans.add(
-      TextSpan(text: cursorChar, color: Colors.black, backgroundColor: Colors.white),
-    );
+    
+    // Only show cursor if focused
+    if (_focusNode.hasFocus) {
+      spans.add(
+        TextSpan(text: cursorChar, color: Colors.black, backgroundColor: Colors.white),
+      );
+    } else {
+      // If not focused, render character normally (or empty space if at end)
+      spans.add(TextSpan(text: cursorChar, color: Colors.white));
+    }
+    
     spans.add(TextSpan(text: after, color: Colors.white));
 
     if (text.isEmpty && widget.placeholder != null) {
-      // If text is empty, cursor is a space. We render placeholder after it?
-      // Or if cursor is at 0, maybe we should render placeholder starting from cursor position?
-      // But cursor is currently "inverted space".
-      // Let's just append placeholder for now as a simple solution.
       spans.add(TextSpan(text: widget.placeholder!, color: Colors.brightBlack));
     }
 
-    return KeyboardListener(
-      onKeyEvent: _handleKeyEvent,
+    return Focus(
+      focusNode: _focusNode,
+      autofocus: widget.autofocus,
+      onKey: _handleKeyEvent,
       child: RichText(text: TextSpan(children: spans)),
     );
   }
