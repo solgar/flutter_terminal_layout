@@ -72,7 +72,7 @@ class _MistralAppState extends State<MistralApp> {
     _scrollToBottom();
 
     try {
-      final response = await _client.chat(
+      final stream = _client.streamChat(
         model: 'mistral-small-latest',
         messages: _messages
             .where((m) => m.role != 'system')
@@ -80,13 +80,31 @@ class _MistralAppState extends State<MistralApp> {
             .toList(),
       );
 
+      String fullResponse = '';
+      bool firstChunk = true;
+
+      await for (final chunk in stream) {
+        fullResponse += chunk;
+        if (mounted) {
+          setState(() {
+            if (firstChunk) {
+              _isLoading = false; // Stop spinner
+              _status = 'Streaming...';
+              _messages.add(Message('assistant', fullResponse));
+              firstChunk = false;
+            } else {
+              // Update last message
+              _messages.last = Message('assistant', fullResponse);
+            }
+          });
+          _scrollToBottom();
+        }
+      }
+
       if (mounted) {
         setState(() {
-          _messages.add(Message('assistant', response));
-          _isLoading = false;
           _status = 'Ready';
         });
-        _scrollToBottom();
       }
     } catch (e) {
       if (mounted) {
