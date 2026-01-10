@@ -75,6 +75,7 @@ class _MistralAppState extends State<MistralApp> {
       final response = await _client.chat(
         model: 'mistral-small-latest',
         messages: _messages
+            .where((m) => m.role != 'system')
             .map((m) => {'role': m.role, 'content': m.content})
             .toList(),
       );
@@ -131,8 +132,20 @@ class _MistralAppState extends State<MistralApp> {
             color: Colors.black,
             child: ListView.builder(
               controller: _scrollController,
-              itemCount: _messages.length,
+              itemCount: _messages.length + (_isLoading ? 1 : 0),
               itemBuilder: (context, index) {
+                if (index == _messages.length) {
+                  return Container(
+                    padding: const EdgeInsets.all(1),
+                    child: Row(
+                      children: [
+                        Text('Assistant: ', color: Colors.green),
+                        Spinner(color: Colors.green),
+                      ],
+                    ),
+                  );
+                }
+
                 final msg = _messages[index];
                 final isUser = msg.role == 'user';
                 final isSystem = msg.role == 'system';
