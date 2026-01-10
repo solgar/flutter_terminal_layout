@@ -631,6 +631,7 @@ class TerminalApp {
       // Handle Resize (SIGWINCH)
       try {
         resizeSub = ProcessSignal.sigwinch.watch().listen((_) {
+          element.markNeedsBuild();
           draw();
         });
       } catch (_) {

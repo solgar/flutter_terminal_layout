@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter_terminal_layout/flutter_terminal_layout.dart';
 
 import 'border_demo.dart';
@@ -27,6 +29,7 @@ class _MainDemoAppState extends State<MainDemoApp> {
   int _selectedIndex = 0;
   Widget? _activeDemo;
   late FocusNode _rootNode;
+  final ScrollController _scrollController = ScrollController();
 
   late final List<MapEntry<String, Widget Function()>> _demos;
 
@@ -55,6 +58,32 @@ class _MainDemoAppState extends State<MainDemoApp> {
     super.dispose();
   }
 
+  void _scrollToSelection() {
+    // Calculate viewport height (must match build logic)
+    final termHeight = Terminal.instance.height;
+    const int maxH = 25;
+    final int dialogH = math.max(10, math.min(maxH, termHeight - 2));
+
+    // Height consumed by non-list items:
+    // Top: Spacer(1) + Title(1) + Separator(1) = 3
+    // Bottom: Footer(1) + Spacer(1) = 2
+    const int bottomOverhead = 2;
+    final int viewportHeight = dialogH - 3 - bottomOverhead;
+
+    if (viewportHeight <= 0) return;
+
+    final double currentOffset = _scrollController.offset;
+
+    // Ensure selected index is visible
+    if (_selectedIndex < currentOffset) {
+      _scrollController.jumpTo(_selectedIndex.toDouble());
+    } else if (_selectedIndex >= currentOffset + viewportHeight) {
+      _scrollController.jumpTo(
+        (_selectedIndex - viewportHeight + 1).toDouble(),
+      );
+    }
+  }
+
   bool _handleInput(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) return false;
     final bytes = event.bytes;
@@ -77,12 +106,14 @@ class _MainDemoAppState extends State<MainDemoApp> {
       // Up
       setState(() {
         _selectedIndex = (_selectedIndex - 1 + _demos.length) % _demos.length;
+        _scrollToSelection();
       });
       return true;
     } else if (Keys.isArrowDown(bytes)) {
       // Down
       setState(() {
         _selectedIndex = (_selectedIndex + 1) % _demos.length;
+        _scrollToSelection();
       });
       return true;
     } else if (Keys.isEnter(bytes)) {
@@ -101,48 +132,119 @@ class _MainDemoAppState extends State<MainDemoApp> {
 
   @override
   Widget build(BuildContext context) {
-    // If demo is active, we just show it. 
-    // It should manage its own focus or bubble up keys to us via parent Focus.
-    // We wrap everything in a Root Focus to catch bubbled keys.
-    
     Widget content;
     if (_activeDemo != null) {
       content = _activeDemo!;
     } else {
-      content = Container(
-        color: Colors.black,
-        alignment: Alignment.center,
+      // Calculate responsive size
+      final termWidth = Terminal.instance.width;
+      final termHeight = Terminal.instance.height;
+
+      const int maxW = 60;
+      const int maxH = 25;
+
+      // Ensure some margin
+      final int dialogW = math.max(20, math.min(maxW, termWidth - 4));
+      final int dialogH = math.max(10, math.min(maxH, termHeight - 2));
+
+      final int contentW = dialogW - 2; // Inside borders
+
+      content = Center(
         child: Container(
-          width: 40,
-          height: 20,
-          padding: const EdgeInsets.all(1),
-          decoration: BoxDecoration(
-            border: BoxBorder.all(color: Colors.cyan, style: BorderStyle.double),
-          ),
-          child: Column(
+          width: dialogW + 2, // +2 for shadow offset space
+          height: dialogH + 1, // +1 for shadow offset space
+          child: Stack(
             children: [
-              Text('Main Demo Switcher', color: Colors.brightCyan),
-              Container(height: 1),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: _demos.length,
-                  itemBuilder: (context, index) {
-                    final isSelected = index == _selectedIndex;
-                    final label = _demos[index].key;
-                    return Container(
-                      color: isSelected ? Colors.blue : null,
-                      child: Text(
-                        (isSelected ? '> ' : '  ') + label,
-                        color: isSelected ? Colors.white : Colors.white,
-                      ),
-                    );
-                  },
-                ),
+              // Shadow
+              Positioned(
+                left: 2,
+                top: 1,
+                width: dialogW,
+                height: dialogH,
+                child: Container(color: Colors.darkGray),
               ),
-              Container(height: 1),
-              Text(
-                'Up/Down/Enter. Esc=Back. q=Quit.',
-                color: Colors.brightBlack,
+              // Main Box
+              Positioned(
+                left: 0,
+                top: 0,
+                width: dialogW,
+                height: dialogH,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    border: BoxBorder.all(
+                      color: Colors.brightBlue,
+                      style: BorderStyle.rounded,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Container(height: 1),
+                      Container(
+                        alignment: Alignment.center,
+                        child: Text(
+                          contentW < 25 ? 'DEMO HUB' : '* TERMINAL DEMO HUB *',
+                          color: Colors.brightYellow,
+                        ),
+                      ),
+                      Container(
+                        height: 1,
+                        child: Center(
+                          child: Text('─' * (contentW - 4), color: Colors.blue),
+                        ),
+                      ),
+                      Expanded(
+                        child: ListView.builder(
+                          controller: _scrollController,
+                          itemCount: _demos.length,
+                          itemBuilder: (context, index) {
+                            final isSelected = index == _selectedIndex;
+                            final label = _demos[index].key;
+                            // Truncate label if too narrow
+                            String displayLabel =
+                                (isSelected ? '> ' : '  ') + label;
+                            if (displayLabel.length > contentW - 2) {
+                              displayLabel =
+                                  '${displayLabel.substring(0, contentW - 3)}…';
+                            }
+
+                            return Container(
+                              color: isSelected ? Colors.blue : null,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 2,
+                              ),
+                              child: Text(
+                                displayLabel,
+                                color: isSelected
+                                    ? Colors.white
+                                    : Colors.brightWhite,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 2),
+                        child: Row(
+                          children: [
+                            Text(
+                              contentW < 40
+                                  ? '↑/↓/Ent | q:Quit'
+                                  : '↑/↓/Enter | Quit: q',
+                              color: Colors.grey,
+                            ),
+                            Spacer(),
+                            Text(
+                              '${_selectedIndex + 1}/${_demos.length}',
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(height: 1),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
@@ -152,7 +254,7 @@ class _MainDemoAppState extends State<MainDemoApp> {
 
     return Focus(
       focusNode: _rootNode,
-      autofocus: true, // Focus menu on start
+      autofocus: true,
       onKey: _handleInput,
       child: content,
     );
