@@ -33,7 +33,6 @@ class RenderText extends RenderObject {
 
   @override
   void performLayout() {
-    // Basic wrapping
     final maxWidth = constraints.maxWidth;
     _lines.clear();
 
@@ -47,21 +46,74 @@ class RenderText extends RenderObject {
       return;
     }
 
-    // Simple character-based wrapping for now
-    // Future improvement: Word-based wrapping
-    for (int i = 0; i < _text.length; i += maxWidth) {
-      int end = i + maxWidth;
-      if (end > _text.length) end = _text.length;
-      _lines.add(_text.substring(i, end));
+    // Split by newlines first
+    final paragraphs = _text.split('\n');
+
+    for (var paragraph in paragraphs) {
+      // Remove \r if present
+      paragraph = paragraph.replaceAll('\r', '');
+      
+      if (paragraph.isEmpty) {
+        _lines.add('');
+        continue;
+      }
+
+      // Word wrapping logic
+      // Split into words, preserving spaces?
+      // Simple approach: split by space, reconstruct.
+      // Better: iterate.
+      
+      final words = paragraph.split(' ');
+      StringBuffer currentLine = StringBuffer();
+      int currentLength = 0;
+
+      for (int i = 0; i < words.length; i++) {
+        final word = words[i];
+        // If word fits in remaining space
+        // Space needed? If not first word.
+        int spaceNeeded = currentLength > 0 ? 1 : 0;
+        
+        if (currentLength + spaceNeeded + word.length <= maxWidth) {
+          if (spaceNeeded > 0) {
+            currentLine.write(' ');
+            currentLength++;
+          }
+          currentLine.write(word);
+          currentLength += word.length;
+        } else {
+          // Word doesn't fit.
+          // If current line is not empty, flush it.
+          if (currentLength > 0) {
+            _lines.add(currentLine.toString());
+            currentLine.clear();
+            currentLength = 0;
+          }
+          
+          // Now check if word fits on new line
+          if (word.length <= maxWidth) {
+            currentLine.write(word);
+            currentLength += word.length;
+          } else {
+            // Word is too long even for a full line. Force break it.
+            String remaining = word;
+            while (remaining.length > maxWidth) {
+              _lines.add(remaining.substring(0, maxWidth));
+              remaining = remaining.substring(maxWidth);
+            }
+            currentLine.write(remaining);
+            currentLength += remaining.length;
+          }
+        }
+      }
+      // Flush last line of paragraph
+      if (currentLength > 0) {
+        _lines.add(currentLine.toString());
+      }
     }
 
     int width = _lines.isEmpty
         ? 0
-        : _lines[0].length; // Simplify: take first line width or max
-    // Actually, width should be the max width of all lines
-    for (var line in _lines) {
-      if (line.length > width) width = line.length;
-    }
+        : _lines.fold(0, (max, line) => line.length > max ? line.length : max);
 
     int height = _lines.length;
 

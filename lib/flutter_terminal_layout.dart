@@ -18,3 +18,4 @@ export 'src/widgets/panel.dart';
 export 'src/widgets/focus.dart';
 export 'src/widgets/divider.dart';
 export 'src/widgets/spinner.dart';
+export 'src/widgets/button.dart';

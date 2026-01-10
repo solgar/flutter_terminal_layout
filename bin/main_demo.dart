@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter_terminal_layout/flutter_terminal_layout.dart';
 
 import 'border_demo.dart';
+import 'button_demo.dart';
 import 'claude_code.dart';
 import 'counter_demo.dart';
 import 'cube_demo.dart';
@@ -37,8 +38,10 @@ class _MainDemoAppState extends State<MainDemoApp> {
   void initState() {
     super.initState();
     _rootNode = FocusNode(debugLabel: 'Main Menu');
+    _rootNode.skipTraversal = true;
     _demos = [
       MapEntry('Border Demo', () => const BorderDemo()),
+      MapEntry('Button Demo', () => const ButtonDemo()),
       MapEntry('Claude Code', () => const ClaudeCodeApp()),
       MapEntry('Counter', () => const CounterApp()),
       MapEntry('Cube 3D', () => const CubeApp()),

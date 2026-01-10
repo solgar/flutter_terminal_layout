@@ -540,6 +540,7 @@ class TerminalApp {
     stdout.write(Ansi.hideCursor);
     stdout.write(Ansi.enableAltBuffer);
     stdout.write(Ansi.enableMouse);
+    stdout.write(Ansi.disableLineWrap);
 
     bool isRestored = false;
     void restoreTerminal() {
@@ -558,6 +559,7 @@ class TerminalApp {
       stdout.write(Ansi.showCursor);
       stdout.write(Ansi.disableAltBuffer);
       stdout.write(Ansi.disableMouse);
+      stdout.write(Ansi.enableLineWrap);
 
       // 3. Force restore via stty (SYNC)
       if (Platform.isLinux || Platform.isMacOS) {

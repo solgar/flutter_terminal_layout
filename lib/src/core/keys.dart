@@ -259,6 +259,15 @@ class Keys {
     return chars.length == 1 && chars[0] == tab;
   }
 
+  /// Checks if the input sequence matches a Backtab (Shift+Tab) event.
+  /// Sequence: ESC [ Z
+  static bool isBacktab(List<int> chars) {
+    return chars.length == 3 &&
+        chars[0] == esc &&
+        chars[1] == bracket &&
+        chars[2] == Z;
+  }
+
   /// Checks if the input sequence matches an Escape event.
   static bool isEscape(List<int> chars) {
     return chars.length == 1 && chars[0] == esc;

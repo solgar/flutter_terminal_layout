@@ -24,6 +24,10 @@ class Ansi {
   static const String enableMouse = '$esc[?1000h$esc[?1006h';
   static const String disableMouse = '$esc[?1000l$esc[?1006l';
 
+  // Line Wrapping
+  static const String enableLineWrap = '$esc[?7h';
+  static const String disableLineWrap = '$esc[?7l';
+
   // Reset
   static const String reset = '$esc[0m';
 

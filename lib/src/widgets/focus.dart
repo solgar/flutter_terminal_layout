@@ -1,6 +1,7 @@
 import 'package:flutter_terminal_layout/src/widgets/framework.dart';
 import 'package:flutter_terminal_layout/src/widgets/widget.dart';
 import '../core/events.dart';
+import '../core/keys.dart';
 
 class FocusNode {
   FocusNode({
@@ -124,7 +125,61 @@ class FocusManager {
       }
       current = current._parent;
     }
+
+    if (event is KeyDownEvent) {
+      if (Keys.isTab(event.bytes)) {
+        _nextFocus();
+        return true;
+      } else if (Keys.isBacktab(event.bytes)) {
+        _previousFocus();
+        return true;
+      }
+    }
+
     return false;
+  }
+
+  void _nextFocus() {
+    final list = _getFocusList();
+    if (list.isEmpty) return;
+    final index = list.indexOf(_primaryFocus!);
+    // If not found (shouldn't happen if list is derived from root of primary), start at 0
+    if (index == -1 || index == list.length - 1) {
+      list.first.requestFocus();
+    } else {
+      list[index + 1].requestFocus();
+    }
+  }
+
+  void _previousFocus() {
+    final list = _getFocusList();
+    if (list.isEmpty) return;
+    final index = list.indexOf(_primaryFocus!);
+    if (index <= 0) {
+      list.last.requestFocus();
+    } else {
+      list[index - 1].requestFocus();
+    }
+  }
+
+  List<FocusNode> _getFocusList() {
+    FocusNode? root = _primaryFocus;
+    if (root == null) return [];
+    while (root!._parent != null) {
+      root = root._parent;
+    }
+
+    final list = <FocusNode>[];
+    void visit(FocusNode node) {
+      if (node.canRequestFocus && !node.skipTraversal) {
+        list.add(node);
+      }
+      for (final child in node._children) {
+        visit(child);
+      }
+    }
+    visit(root);
+    return list;
   }
 }
 
@@ -148,6 +203,9 @@ class Focus extends StatefulWidget {
   final bool autofocus;
   final Function(bool)? onFocusChange;
   final FocusOnKeyCallback? onKey;
+  final bool canRequestFocus;
+  final bool skipTraversal;
+  final String? debugLabel;
 
   const Focus({
     super.key,
@@ -156,6 +214,9 @@ class Focus extends StatefulWidget {
     this.autofocus = false,
     this.onFocusChange,
     this.onKey,
+    this.canRequestFocus = true,
+    this.skipTraversal = false,
+    this.debugLabel,
   });
 
   static FocusNode? of(BuildContext context) {
@@ -175,11 +236,20 @@ class _FocusState extends State<Focus> {
   @override
   void initState() {
     super.initState();
-    _node = widget.focusNode ?? FocusNode();
+    _node = widget.focusNode ?? FocusNode(debugLabel: widget.debugLabel);
     _node._manager = FocusManager.instance;
-    // Sync onKey
+    // Sync properties
+    _node.canRequestFocus = widget.canRequestFocus;
+    _node.skipTraversal = widget.skipTraversal;
     if (widget.onKey != null) {
       _node.onKey = widget.onKey;
+    }
+    _node.addListener(_handleFocusChange);
+  }
+
+  void _handleFocusChange() {
+    if (widget.onFocusChange != null) {
+      widget.onFocusChange!(_node.hasFocus);
     }
   }
 
@@ -201,6 +271,8 @@ class _FocusState extends State<Focus> {
     if (widget.focusNode != oldWidget.focusNode) {
        // Handle node replacement if needed (complex)
     }
+    _node.canRequestFocus = widget.canRequestFocus;
+    _node.skipTraversal = widget.skipTraversal;
     if (widget.onKey != null) {
       _node.onKey = widget.onKey;
     }
@@ -208,6 +280,7 @@ class _FocusState extends State<Focus> {
 
   @override
   void dispose() {
+    _node.removeListener(_handleFocusChange);
     if (widget.focusNode == null) {
       _node.dispose();
     } else {
