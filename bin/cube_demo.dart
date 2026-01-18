@@ -1,9 +1,9 @@
 import 'dart:math' as math;
 import 'dart:async';
 import 'dart:typed_data';
-import 'package:flutter_terminal_layout/flutter_terminal_layout.dart';
-import 'package:flutter_terminal_layout/src/rendering/render_object.dart';
-import 'package:flutter_terminal_layout/src/rendering/canvas.dart';
+import 'package:flutterlike_tui/flutterlike_tui.dart';
+import 'package:flutterlike_tui/src/rendering/render_object.dart';
+import 'package:flutterlike_tui/src/rendering/canvas.dart';
 
 void main() {
   runApp(const CubeApp());

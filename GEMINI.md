@@ -1,8 +1,8 @@
-# flutter_terminal_layout
+# flutterlike_tui
 
 ## Project Overview
 
-`flutter_terminal_layout` is a Dart framework for building Terminal User Interfaces (TUIs) using an architecture strongly inspired by Flutter. It implements the core Flutter Rendering Pipeline (`Widget` -> `Element` -> `RenderObject`), adapting it for terminal character cells instead of pixels.
+`flutterlike_tui` is a Dart framework for building Terminal User Interfaces (TUIs) using an architecture strongly inspired by Flutter. It implements the core Flutter Rendering Pipeline (`Widget` -> `Element` -> `RenderObject`), adapting it for terminal character cells instead of pixels.
 
 **Key Features:**
 *   **Flutter-like API:** Uses `StatelessWidget`, `StatefulWidget`, `setState`, and `BuildContext`.

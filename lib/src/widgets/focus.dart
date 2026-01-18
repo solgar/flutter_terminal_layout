@@ -1,5 +1,5 @@
-import 'package:flutter_terminal_layout/src/widgets/framework.dart';
-import 'package:flutter_terminal_layout/src/widgets/widget.dart';
+import 'package:flutterlike_tui/src/widgets/framework.dart';
+import 'package:flutterlike_tui/src/widgets/widget.dart';
 import '../core/events.dart';
 import '../core/keys.dart';
 

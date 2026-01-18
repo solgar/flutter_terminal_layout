@@ -1,6 +1,6 @@
-import 'package:flutter_terminal_layout/flutter_terminal_layout.dart';
-// RichText is exported by flutter_terminal_layout, but if it causes conflict or is needed explicitly:
-// import 'package:flutter_terminal_layout/src/widgets/rich_text.dart';
+import 'package:flutterlike_tui/flutterlike_tui.dart';
+// RichText is exported by flutterlike_tui, but if it causes conflict or is needed explicitly:
+// import 'package:flutterlike_tui/src/widgets/rich_text.dart';
 
 class GeminiApp extends StatefulWidget {
   const GeminiApp({super.key});

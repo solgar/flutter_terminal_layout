@@ -1,6 +1,6 @@
 # Mistral AI CLI Client
 
-A GUI-like terminal chat client for Mistral AI, built with `flutter_terminal_layout`.
+A GUI-like terminal chat client for Mistral AI, built with `flutterlike_tui`.
 
 ## Setup
 

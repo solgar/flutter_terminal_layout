@@ -1,4 +1,4 @@
-import 'package:flutter_terminal_layout/flutter_terminal_layout.dart';
+import 'package:flutterlike_tui/flutterlike_tui.dart';
 
 class VerticalDivider extends StatelessWidget {
   final int? width;

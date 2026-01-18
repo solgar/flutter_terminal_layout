@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:flutter_terminal_layout/flutter_terminal_layout.dart';
+import 'package:flutterlike_tui/flutterlike_tui.dart';
 
 import 'border_demo.dart';
 import 'button_demo.dart';
