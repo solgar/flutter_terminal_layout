@@ -66,6 +66,17 @@ class _CubeAppState extends State<CubeApp> {
             scaleFactor: _scaleFactor,
           ),
           Positioned(
+            top: 0,
+            left: 0,
+            child: Container(
+              color: Colors.blue,
+              child: Text(
+                ' Zoom: ${_scaleFactor.toStringAsFixed(1)}x ',
+                color: Colors.white,
+              ),
+            ),
+          ),
+          Positioned(
             bottom: 0,
             left: 0,
             child: Container(
@@ -152,7 +163,11 @@ class RenderCube extends RenderObject {
     }
     // Clear buffers
     _zBuffer!.fillRange(0, _zBuffer!.length, double.infinity);
-    _colorBuffer!.fillRange(0, _colorBuffer!.length, 0xFF000000); // Black background
+    _colorBuffer!.fillRange(
+      0,
+      _colorBuffer!.length,
+      0xFF000000,
+    ); // Black background
   }
 
   @override
@@ -164,15 +179,21 @@ class RenderCube extends RenderObject {
 
     final centerX = w / 2.0;
     final centerY = h / 2.0;
-    
-    // Scale: The terminal cell is approx 1:2. 
+
+    // Scale: The terminal cell is approx 1:2.
     // In our 2x vertical buffer, pixels are approx 1:1.
     // So we can use uniform scaling.
     final scale = (math.min(w, h) / 3.5) * scaleFactor;
 
     final vertices = [
-      Vector3(-1, -1, -1), Vector3(1, -1, -1), Vector3(1, 1, -1), Vector3(-1, 1, -1),
-      Vector3(-1, -1, 1),  Vector3(1, -1, 1),  Vector3(1, 1, 1),  Vector3(-1, 1, 1),
+      Vector3(-1, -1, -1),
+      Vector3(1, -1, -1),
+      Vector3(1, 1, -1),
+      Vector3(-1, 1, -1),
+      Vector3(-1, -1, 1),
+      Vector3(1, -1, 1),
+      Vector3(1, 1, 1),
+      Vector3(-1, 1, 1),
     ];
 
     // Define triangles (Counter-clockwise winding)
@@ -191,38 +212,43 @@ class RenderCube extends RenderObject {
     for (var v in vertices) {
       // Rotate
       double x = v.x, y = v.y, z = v.z;
-      
+
       // Rot X
       double y1 = y * math.cos(angleX) - z * math.sin(angleX);
       double z1 = y * math.sin(angleX) + z * math.cos(angleX);
-      y = y1; z = z1;
+      y = y1;
+      z = z1;
 
       // Rot Y
       double x1 = x * math.cos(angleY) + z * math.sin(angleY);
       double z2 = -x * math.sin(angleY) + z * math.cos(angleY);
-      x = x1; z = z2;
+      x = x1;
+      z = z2;
 
       // Rot Z
       double x2 = x * math.cos(angleZ) - y * math.sin(angleZ);
       double y2 = x * math.sin(angleZ) + y * math.cos(angleZ);
-      x = x2; y = y2;
+      x = x2;
+      y = y2;
 
       // Project
       double distance = 4.0;
       double factor = scale * (1.0 / (distance - z));
-      
-      transformed.add(Vector3(
-        centerX + x * factor,
-        centerY + y * factor,
-        z // Keep Z for Z-buffer
-      ));
+
+      transformed.add(
+        Vector3(
+          centerX + x * factor,
+          centerY + y * factor,
+          z, // Keep Z for Z-buffer
+        ),
+      );
     }
 
     // 2. Rasterize Triangles
     for (int i = 0; i < indices.length; i += 3) {
       final v0 = transformed[indices[i]];
-      final v1 = transformed[indices[i+1]];
-      final v2 = transformed[indices[i+2]];
+      final v1 = transformed[indices[i + 1]];
+      final v2 = transformed[indices[i + 2]];
 
       // Face Normal (Flat shading)
       // Check winding (Backface culling)
@@ -235,7 +261,7 @@ class RenderCube extends RenderObject {
       // Let's assign colors based on Face ID (i/6).
       int faceId = i ~/ 6;
       Color faceColor;
-      
+
       // Base colors for faces
       List<Color> baseColors = [
         const Color.fromARGB(255, 255, 100, 100), // Front (Red-ish)
@@ -245,9 +271,9 @@ class RenderCube extends RenderObject {
         const Color.fromARGB(255, 100, 255, 255), // Top (Cyan-ish)
         const Color.fromARGB(255, 255, 100, 255), // Bottom (Magenta-ish)
       ];
-      
+
       faceColor = baseColors[faceId];
-      
+
       // Draw Triangle
       _drawTriangle(v0, v1, v2, faceColor.value);
     }
@@ -307,7 +333,7 @@ class RenderCube extends RenderObject {
         // Pixel center
         double px = x + 0.5;
         double py = y + 0.5;
-        
+
         double w0 = _edgeFunction(v1, v2, px, py);
         double w1 = _edgeFunction(v2, v0, px, py);
         double w2 = _edgeFunction(v0, v1, px, py);
@@ -316,7 +342,7 @@ class RenderCube extends RenderObject {
         // Since we culled backfaces, area should be positive (or negative consistent).
         // If area > 0, then all w must be >= 0.
         // If area < 0, all w must be <= 0.
-        bool inside = (area > 0) 
+        bool inside = (area > 0)
             ? (w0 >= 0 && w1 >= 0 && w2 >= 0)
             : (w0 <= 0 && w1 <= 0 && w2 <= 0);
 
@@ -329,19 +355,19 @@ class RenderCube extends RenderObject {
           // Interpolate Z
           double z = b0 * v0.z + b1 * v1.z + b2 * v2.z;
           double depth = 4.0 - z;
-          
+
           int idx = y * _bufferWidth + x;
           if (depth < _zBuffer![idx]) {
             _zBuffer![idx] = depth;
-            
+
             // Depth shading: Darker further away
             // Depth ranges approx 3.0 to 5.0
             double shade = 1.0 - ((depth - 2.0) / 4.0).clamp(0.0, 0.8);
-            
+
             int ir = (r * shade * 255).toInt();
             int ig = (g * shade * 255).toInt();
             int ib = (b * shade * 255).toInt();
-            
+
             _colorBuffer![idx] = (0xFF << 24) | (ir << 16) | (ig << 8) | ib;
           }
         }
@@ -350,20 +376,20 @@ class RenderCube extends RenderObject {
   }
 
   double _edgeFunction(Vector3 a, Vector3 b, double px, double py) {
-     return (b.x - a.x) * (py - a.y) - (b.y - a.y) * (px - a.x);
+    return (b.x - a.x) * (py - a.y) - (b.y - a.y) * (px - a.x);
   }
 }
 
 class Vector3 {
   final double x, y, z;
   const Vector3(this.x, this.y, this.z);
-  
+
   Vector3 operator +(Vector3 o) => Vector3(x + o.x, y + o.y, z + o.z);
   Vector3 operator -(Vector3 o) => Vector3(x - o.x, y - o.y, z - o.z);
-  
+
   Vector3 normalized() {
-    double l = math.sqrt(x*x + y*y + z*z);
+    double l = math.sqrt(x * x + y * y + z * z);
     if (l == 0) return this;
-    return Vector3(x/l, y/l, z/l);
+    return Vector3(x / l, y / l, z / l);
   }
 }

@@ -1,43 +1,6 @@
+import 'dart:typed_data';
 import '../core/ansi.dart';
 import 'geometry.dart';
-
-class Cell {
-  String char;
-  Color? fgColor;
-  Color? bgColor;
-  bool isBorder;
-
-  Cell(this.char, {this.fgColor, this.bgColor, this.isBorder = false});
-
-  Cell.empty() : char = ' ', isBorder = false;
-
-  void reset() {
-    char = ' ';
-    fgColor = null;
-    bgColor = null;
-    isBorder = false;
-  }
-
-  void copyFrom(Cell other) {
-    char = other.char;
-    fgColor = other.fgColor;
-    bgColor = other.bgColor;
-    isBorder = other.isBorder;
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is Cell &&
-        other.char == char &&
-        other.fgColor == fgColor &&
-        other.bgColor == bgColor &&
-        other.isBorder == isBorder;
-  }
-
-  @override
-  int get hashCode => Object.hash(char, fgColor, bgColor, isBorder);
-}
 
 class CanvasStats {
   final int changedCells;
@@ -53,8 +16,17 @@ class CanvasStats {
 class Canvas {
   final int width;
   final int height;
-  final List<List<Cell>> _backBuffer;
-  final List<List<Cell>> _frontBuffer;
+  
+  // Stride = 3: [Char+Flags, FG, BG]
+  // Char+Flags: 
+  //   Bits 0-23: Char Code (Unicode)
+  //   Bit 24: isBorder
+  static const int _stride = 3;
+  static const int _flagBorder = 1 << 24;
+  static const int _maskChar = 0xFFFFFF;
+
+  final Int32List _backBuffer;
+  final Int32List _frontBuffer;
 
   CanvasStats? lastStats;
 
@@ -64,14 +36,8 @@ class Canvas {
   Canvas(Size size)
     : width = size.width,
       height = size.height,
-      _backBuffer = List.generate(
-        size.height,
-        (_) => List.generate(size.width, (_) => Cell.empty()),
-      ),
-      _frontBuffer = List.generate(
-        size.height,
-        (_) => List.generate(size.width, (_) => Cell.empty()),
-      );
+      _backBuffer = Int32List(size.width * size.height * _stride),
+      _frontBuffer = Int32List(size.width * size.height * _stride);
 
   void save() {
     if (_clipStack.isEmpty) {
@@ -88,11 +54,15 @@ class Canvas {
   }
 
   void clear() {
-    for (var row in _backBuffer) {
-      for (var cell in row) {
-        cell.reset();
-      }
-    }
+    // 0 represents null color and '\0' char. 
+    // We want ' ' (space) as default char.
+    // ' ' is 32.
+    // Efficient clearing: fill with 0 then set chars? 
+    // Or just loop. Int32List fill is fast.
+    // We need 32, 0, 0, 32, 0, 0...
+    // For now, simple loop is fine or we accept 0 as Space in diff logic.
+    // Let's accept 0 as Space in logic to allow fast fillRange.
+    _backBuffer.fillRange(0, _backBuffer.length, 0);
     _clipStack.clear();
   }
 
@@ -157,39 +127,43 @@ class Canvas {
       if (!_clipStack.last.contains(Offset(x, y))) return;
     }
 
-    final cell = _backBuffer[y][x];
+    final int index = (y * width + x) * _stride;
+    
+    // Read current state
+    final int currentVal = _backBuffer[index];
+    final int currentCharCode = currentVal & _maskChar;
+    final bool currentIsBorder = (currentVal & _flagBorder) != 0;
 
-    if (isBorder && cell.isBorder) {
+    int newCharCode = char.codeUnitAt(0); // Assumes single code unit
+    bool newIsBorder = isBorder;
+
+    if (isBorder && currentIsBorder) {
       // Merge logic
-      final oldMask = _charToMask[cell.char] ?? 0;
+      final String currentChar = String.fromCharCode(currentCharCode == 0 ? 32 : currentCharCode);
+      final oldMask = _charToMask[currentChar] ?? 0;
       final newMask = _charToMask[char] ?? 0;
+      
       if (oldMask != 0 && newMask != 0) {
         final combined = oldMask | newMask;
-        cell.char = _maskToChar[combined] ?? char;
+        final String combinedChar = _maskToChar[combined] ?? char;
+        newCharCode = combinedChar.codeUnitAt(0);
       } else {
-        cell.char = char; // Non-mergeable border
+        newCharCode = char.codeUnitAt(0);
       }
-      cell.isBorder = true;
-    } else if (cell.isBorder && !isBorder && char == ' ') {
-      // If we are painting space (e.g. background fill) over a border,
-      // preserve the border character and only update background.
-      // This allows 'transparent' overlaps for border merging.
-      if (bg != null) cell.bgColor = bg;
+      newIsBorder = true;
+    } else if (currentIsBorder && !isBorder && char == ' ') {
+      // Painting space over border -> preserve border, only update BG
+      if (bg != null) _backBuffer[index + 2] = bg.value;
       return;
-    } else {
-      cell.char = char;
-      cell.isBorder = isBorder; // Update flag
     }
 
-    // Determine colors: New color overrides old unless we want to do something smart?
-    // User probably wants the newest color.
-    if (fg != null) cell.fgColor = fg;
-    if (bg != null) cell.bgColor = bg;
+    // Write new state
+    _backBuffer[index] = newCharCode | (newIsBorder ? _flagBorder : 0);
+    if (fg != null) _backBuffer[index + 1] = fg.value;
+    if (bg != null) _backBuffer[index + 2] = bg.value;
   }
 
   void drawText(int x, int y, String text, {Color? fg, Color? bg}) {
-    // Optimization to skip if y is totally out (requires Rect checks of range)
-    // For now simple per-char check in setCell works.
     for (int i = 0; i < text.length; i++) {
       setCell(x + i, y, text[i], fg: fg, bg: bg);
     }
@@ -213,79 +187,78 @@ class Canvas {
 
   /// Calculates the difference between the back buffer and the front buffer,
   /// generates optimized ANSI sequences for the updates, and swaps the buffers.
-  ///
-  /// This implements:
-  /// 1. Double Buffering & Diffing: Only changed cells are drawn.
-  /// 2. Style Optimization: ANSI codes are only emitted when style changes.
-  /// 3. Cursor Optimization: Moves cursor only when necessary.
   String diff() {
     final buffer = StringBuffer();
     // buffer.write(Ansi.hideCursor); // Ensure cursor is hidden during update
 
-    Color? currentFg;
-    Color? currentBg;
+    int? currentFg;
+    int? currentBg;
     int? currentRow;
     int? currentCol;
 
     // Helper to emit style change if needed
-    void updateStyle(Color? fg, Color? bg) {
+    void updateStyle(int fg, int bg) {
       if (fg != currentFg) {
-        if (fg == null) {
-          // If we need to clear FG, we might need reset.
-          // Simple approach: Reset all and re-apply BG if needed.
-          // Or use default color code if available (39 for FG).
-          // For now, let's use full reset if either is null, which is safer but verbose.
-          // Optimized: Use specific codes if possible.
+        if (fg == 0) { // 0 is null/default
           buffer.write('\x1b[39m'); // Default FG
         } else {
-          buffer.write(fg.ansiFg);
+          buffer.write(Color(fg).ansiFg);
         }
         currentFg = fg;
       }
       if (bg != currentBg) {
-        if (bg == null) {
+        if (bg == 0) { // 0 is null/default
           buffer.write('\x1b[49m'); // Default BG
         } else {
-          buffer.write(bg.ansiBg);
+          buffer.write(Color(bg).ansiBg);
         }
         currentBg = bg;
       }
     }
 
-    // Force style reset at start of batch if we don't track persistent terminal state
-    // buffer.write(Ansi.reset);
-    // currentFg = null;
-    // currentBg = null;
-
     int changedCells = 0;
-
-    for (int y = 0; y < height; y++) {
-      for (int x = 0; x < width; x++) {
-        final back = _backBuffer[y][x];
-        final front = _frontBuffer[y][x];
-
-        if (back != front) {
-          changedCells++;
-          // Cell changed
-          // Move cursor if not sequential
-          if (currentRow != y || currentCol != x) {
-            // Optimization: If it's just next char, no need to move (implicit)
-            // But here we are iterating. If x == currentCol + 1, it's sequential.
-            // But we only update if changed.
-            // If we skipped some chars (because they were identical), we MUST move.
-            buffer.write(Ansi.moveTo(y + 1, x + 1));
-          }
-
-          updateStyle(back.fgColor, back.bgColor);
-          buffer.write(back.char);
-
-          // Update state
-          currentRow = y;
-          currentCol = x + 1;
-
-          // Sync front buffer
-          front.copyFrom(back);
+    final int len = _backBuffer.length;
+    
+    // Direct buffer iteration
+    int x = 0;
+    int y = 0;
+    
+    for (int i = 0; i < len; i += _stride) {
+      // Check for changes (unrolled comparison)
+      if (_backBuffer[i] != _frontBuffer[i] || 
+          _backBuffer[i+1] != _frontBuffer[i+1] || 
+          _backBuffer[i+2] != _frontBuffer[i+2]) {
+        
+        changedCells++;
+        
+        // Move cursor if not sequential
+        if (currentRow != y || currentCol != x) {
+          buffer.write(Ansi.moveTo(y + 1, x + 1));
         }
+
+        final int charVal = _backBuffer[i] & _maskChar;
+        final int fgVal = _backBuffer[i+1];
+        final int bgVal = _backBuffer[i+2];
+
+        updateStyle(fgVal, bgVal);
+        
+        // 0 (NUL) is treated as Space
+        buffer.write(charVal == 0 ? ' ' : String.fromCharCode(charVal));
+
+        // Update state
+        currentRow = y;
+        currentCol = x + 1;
+
+        // Sync front buffer
+        _frontBuffer[i] = _backBuffer[i];
+        _frontBuffer[i+1] = _backBuffer[i+1];
+        _frontBuffer[i+2] = _backBuffer[i+2];
+      }
+
+      x++;
+      if (x >= width) {
+        x = 0;
+        y++;
       }
     }
     
